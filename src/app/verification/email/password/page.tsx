@@ -61,26 +61,35 @@ export default function VerificationEmailPasswordPage() {
     return `${m}:${s}`;
   }
 
-  function extractErrorMsg(err: any) {
-    // Backend returns different shapes; try to extract readable message
-    if (!err) return "Xatolik yuz berdi";
-    const resp = err.response?.data;
-    if (!resp) return err.message || "Xatolik yuz berdi";
-
-    // If resp.message is string
+  interface BackendErrorResponse {
+    response?: {
+      data?: {
+        message?: string | { message?: string | string[] };
+      };
+    };
+    message?: string;
+  }
+  
+  function extractErrorMsg(err: unknown): string {
+    const error = err as BackendErrorResponse;
+  
+    if (!error) return "Xatolik yuz berdi";
+  
+    const resp = error.response?.data;
+    if (!resp) return error.message || "Xatolik yuz berdi";
+  
     if (typeof resp.message === "string") return resp.message;
-
-    // If resp.message is object with message array (as user showed)
-    if (typeof resp.message === "object") {
-      // resp.message.message might be array
-      const inner = (resp.message as any).message;
+  
+    if (resp.message && typeof resp.message === "object") {
+      const inner = resp.message.message;
       if (Array.isArray(inner)) return inner.join(", ");
       if (typeof inner === "string") return inner;
     }
-
-    // fallback
+  
     return JSON.stringify(resp);
   }
+  
+  
 
   // --- mount: email check + timer start ---
   useEffect(() => {
