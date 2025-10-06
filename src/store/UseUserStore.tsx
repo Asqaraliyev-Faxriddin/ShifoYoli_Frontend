@@ -6,6 +6,8 @@ type User = {
   email: string;
   password: string; 
   age:number;
+  day:number;
+  month:number
 };
 
 

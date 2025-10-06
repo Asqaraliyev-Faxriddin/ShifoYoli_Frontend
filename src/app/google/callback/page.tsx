@@ -48,7 +48,6 @@ export default function GooglePasswordForm() {
     age: "",
     day: "",
     month: "",
-    year: "",
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -154,7 +153,6 @@ export default function GooglePasswordForm() {
           age: Number(form.age),
           day: Number(form.day),
           month: Number(form.month),
-          year: Number(form.year),
         },
         {
           headers: { Authorization: `Bearer ${accessToken}` },
@@ -287,29 +285,7 @@ export default function GooglePasswordForm() {
           </div>
 
           {/* Yil */}
-          <div>
-  <label className="block text-sm font-medium mb-1">Yil</label>
-  <input
-    type="text"
-    name="year"
-    value={form.year}
-    onChange={(e) => {
-      const value = e.target.value.replace(/\D/g, ""); // faqat raqam
-      const num = Number(value);
-      const currentYear = new Date().getFullYear();
 
-      if (num > currentYear || num < 0) return; // yildan oshsa yoki manfiy bo‘lsa, yozilmaydi
-
-      setForm((prev) => ({ ...prev, year: value }));
-    }}
-    inputMode="numeric"
-    pattern="[0-9]*"
-    maxLength={4}
-    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 dark:bg-gray-700"
-    placeholder="2000"
-    required
-  />
-</div>
 
         </div>
 
