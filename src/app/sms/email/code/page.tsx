@@ -32,7 +32,6 @@ type RegisterResponse = {
 export default function VerifyPage() {
   const router = useRouter();
   const user = useUserStore((s) => s.user);
-    console.log(useUserStore());
     
 
   const OTP_LENGTH = 5;

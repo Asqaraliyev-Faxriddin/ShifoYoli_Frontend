@@ -2,6 +2,7 @@
 
 
 import { useUserStore } from '@/store/UseUserStore';
+import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import React, { useState, useCallback, useMemo, ReactNode } from 'react';
 
@@ -461,18 +462,16 @@ let {setUser} = useUserStore()
     
     // Simulate API call (since external APIs are not available)
     try {
-      console.log("Submitting form data:", {
-        ...form,
-        age: Number(form.age),
-        month: Number(form.month),
-        day: Number(form.day),
-        
-      });
-
+      
 
       setUser({...form,day:Number(form.day),month:Number(form.month),age:Number(form.age)})
 
-
+      await axios.post(
+        "https://faxriddin.bobur-dev.uz/verification/send",
+        {email:form.email,type:"register"}, 
+       
+      );
+      
 
       // Mock API call to send verification code
       await new Promise(resolve => setTimeout(resolve, 1500)); 
