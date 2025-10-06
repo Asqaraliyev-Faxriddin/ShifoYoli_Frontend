@@ -1,6 +1,8 @@
 "use client";
 
 
+import { useUserStore } from '@/store/UseUserStore';
+import { useRouter } from 'next/navigation';
 import React, { useState, useCallback, useMemo, ReactNode } from 'react';
 
 type Lang = "uz" | "en" | "ru";
@@ -350,6 +352,12 @@ const App = () => {
     password: "",
     repeatPassword: "",
   });
+
+let router = useRouter()
+
+let {setUser} = useUserStore()
+
+
   const [errors, setErrors] = useState<Errors>({});
   const [submitting, setSubmitting] = useState(false);
   const [lang, setLang] = useState<Lang>("uz");
@@ -367,7 +375,7 @@ const App = () => {
     if (alertOpen) {
       const timer = setTimeout(() => {
         setAlertOpen(false);
-      }, 4000);
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [alertOpen]);
@@ -458,8 +466,13 @@ const App = () => {
         age: Number(form.age),
         month: Number(form.month),
         day: Number(form.day),
-        // Password and repeatPassword would be hashed/removed in a real app
+        
       });
+
+
+      setUser({...form,day:Number(form.day),month:Number(form.month),age:Number(form.age)})
+
+
 
       // Mock API call to send verification code
       await new Promise(resolve => setTimeout(resolve, 1500)); 
@@ -470,7 +483,9 @@ const App = () => {
 
       // Simulate navigation to the code verification page
       console.log("Simulating navigation to /sms/email/code");
-      
+
+      router.push("sms/email/code")
+
     } catch (err: unknown) {
       console.error("Submission Error:", err);
       setAlertMessage(t.errorMsg);

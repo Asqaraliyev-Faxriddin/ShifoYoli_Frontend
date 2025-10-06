@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert, { AlertColor, AlertProps } from "@mui/material/Alert";
 import { useUserStore } from "@/store/UseUserStore";
+import { Days_One } from "next/font/google";
 
 // Snackbar uchun wrapper
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(props, ref) {
@@ -31,6 +32,8 @@ type RegisterResponse = {
 export default function VerifyPage() {
   const router = useRouter();
   const user = useUserStore((s) => s.user);
+    console.log(useUserStore());
+    
 
   const OTP_LENGTH = 5;
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
@@ -44,6 +47,8 @@ export default function VerifyPage() {
 
   // sahifa ochilganda
   useEffect(() => {
+    console.log(user);
+    
     if (!user) {
       router.push("/");
     } else {
@@ -163,6 +168,9 @@ export default function VerifyPage() {
           firstName: user.firstName,
           age: user.age ?? 0,
           otp: code,
+          day:user.day,
+          month:user.month
+          
         }
       );
 
