@@ -466,12 +466,19 @@ let {setUser} = useUserStore()
 
       setUser({...form,day:Number(form.day),month:Number(form.month),age:Number(form.age)})
 
-      await axios.post(
+      let res = await axios.post(
         "https://faxriddin.bobur-dev.uz/verification/send",
         {email:form.email,type:"register"}, 
        
       );
       
+      if(res.status == 400){
+        const backendMsg = res.data?.message;
+        
+          setAlertMessage(backendMsg || t.errorMsg);
+          setAlertSeverity("error");
+          setAlertOpen(true);
+      }
 
       // Mock API call to send verification code
       await new Promise(resolve => setTimeout(resolve, 1500)); 
@@ -481,15 +488,27 @@ let {setUser} = useUserStore()
       setAlertOpen(true);
 
       // Simulate navigation to the code verification page
-      console.log("Simulating navigation to /sms/email/code");
+
+
+
+
+
 
       router.push("sms/email/code")
 
     } catch (err: unknown) {
-      console.error("Submission Error:", err);
-      setAlertMessage(t.errorMsg);
-      setAlertSeverity("error");
-      setAlertOpen(true);
+
+      
+        const error = err as {
+            response?: { data?: { message?: string } };
+            message?: string;
+          };
+        
+          const backendMsg = error.response?.data?.message;
+        
+          setAlertMessage(backendMsg || t.errorMsg);
+          setAlertSeverity("error");
+          setAlertOpen(true);
     } finally {
       setSubmitting(false);
     }
@@ -693,8 +712,8 @@ let {setUser} = useUserStore()
 
         <div className="mt-6 text-center">
           <a
-            href="#"
-            onClick={(e) => { e.preventDefault(); console.log('Navigating to login page...'); }}
+            href="/login"
+            onClick={(e) => {  router.push("login"); console.log('Navigating to login page...'); }}
             className="text-teal-600 dark:text-teal-400 font-medium hover:underline transition-colors duration-200"
           >
             {t.login}

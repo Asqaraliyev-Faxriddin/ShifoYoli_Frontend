@@ -124,7 +124,7 @@ export default function VerifyPage() {
       setAlertOpen(true);
       return;
     }
-
+  
     const code = otp.join("");
     if (code.length !== OTP_LENGTH || otp.some((v) => v === "")) {
       setAlertMessage("Iltimos to'liq kodni kiriting.");
@@ -132,79 +132,128 @@ export default function VerifyPage() {
       setAlertOpen(true);
       return;
     }
-
+  
     setSubmitting(true);
-
+  
     try {
       // 1) verification/verify
-      const verifyRes = await axios.post<VerifyResponse>(
-        "https://faxriddin.umidjon-dev.uz/verification/verify",
-        {
-          type: "register",
-          email: user.email,
-          otp: code,
+      let vdata: any;
+      try {
+        const verifyRes = await axios.post<VerifyResponse>(
+          "https://faxriddin.bobur-dev.uz/verification/verify",
+          {
+            type: "register",
+            email: user.email,
+            otp: code,
+          }
+        );
+        vdata = verifyRes.data;
+  
+        const verified =
+          vdata.success ??
+          vdata.succase ??
+          vdata.ok ??
+          (verifyRes.status >= 200 && verifyRes.status < 300);
+  
+        if (!verified) {
+          setAlertMessage(vdata.message || "Kod tasdiqlanmadi");
+          setAlertSeverity("error");
+          setAlertOpen(true);
+          return; // ❌ register chaqirilmaydi
         }
-      );
-
-      const vdata = verifyRes.data;
-      const verified =
-        vdata.success ??
-        vdata.succase ??
-        vdata.ok ??
-        (verifyRes.status >= 200 && verifyRes.status < 300);
-
-      if (!verified) {
-        throw new Error(vdata.message || "Kod tasdiqlanmadi");
-      }
-
-      // 2) auth/register
-      const registerRes = await axios.post<RegisterResponse>(
-        "https://faxriddin.umidjon-dev.uz/auth/register",
-        {
-          email: user.email,
-          password: user.password,
-          lastName: user.lastName,
-          firstName: user.firstName,
-          age: user.age ?? 0,
-          otp: code,
-          day:user.day,
-          month:user.month
-          
+      } catch (error) {
+        // ❌ verify xato qaytarsa shu yerda to‘xtaymiz
+        if (axios.isAxiosError(error)) {
+          const data = error.response?.data;
+          let msg = "Kod noto‘g‘ri yoki muddati tugagan";
+  
+          if (data) {
+            if (Array.isArray(data.message)) {
+              msg = data.message.join("\n");
+            } else if (typeof data.message === "string") {
+              msg = data.message;
+            }
+          }
+  
+          setAlertMessage(msg);
+          setAlertSeverity("error");
+          setAlertOpen(true);
+          return; // ❌ faqat alert chiqadi, register ga o‘tmaydi
         }
-      );
-
-      const rdata = registerRes.data;
-      const accessToken = rdata.tokens?.AccessToken;
-      const refreshToken = rdata.tokens?.RefreshToken;
-
-      if (accessToken && refreshToken) {
-        localStorage.setItem("accessToken", accessToken);
-        localStorage.setItem("refreshToken", refreshToken);
+  
+        setAlertMessage("Kod tasdiqlanmadi");
+        setAlertSeverity("error");
+        setAlertOpen(true);
+        return;
       }
-
-      setAlertMessage("Muvaffaqiyatli! Profilga yo'naltirilmoqda...");
-      setAlertSeverity("success");
-      setAlertOpen(true);
-
-      router.push("/profile");
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const msg =
-          error.response?.data?.message ||
-          error.message ||
-          "Xatolik yuz berdi";
-        setAlertMessage(msg);
-      } else if (error instanceof Error) {
-        setAlertMessage(error.message);
-      } else {
-        setAlertMessage("Noma'lum xatolik yuz berdi. \n Iltimos keyin roq urinib ko'ring.");
+  
+      // 2) faqat verify muvaffaqiyatli bo‘lsa auth/register chaqiramiz
+      try {
+        const registerRes = await axios.post<RegisterResponse>(
+          "https://faxriddin.bobur-dev.uz/auth/register",
+          {
+            email: user.email,
+            password: user.password,
+            lastName: user.lastName,
+            firstName: user.firstName,
+            age: user.age ?? 0,
+            otp: code,
+            day: user.day,
+            month: user.month,
+          }
+        );
+  
+        const rdata = registerRes.data;
+        const accessToken = rdata.tokens?.AccessToken;
+        const refreshToken = rdata.tokens?.RefreshToken;
+  
+        if (accessToken && refreshToken) {
+          localStorage.setItem("accessToken", accessToken);
+          localStorage.setItem("refreshToken", refreshToken);
+        }
+  
+        setAlertMessage("Muvaffaqiyatli! Profilga yo'naltirilmoqda...");
+        setAlertSeverity("success");
+        setAlertOpen(true);
+  
+        router.push("/profile");
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          const data = error.response?.data;
+          let msg = "Ro'yxatdan o'tishda xatolik";
+  
+          if (data) {
+            if (Array.isArray(data.message)) {
+              msg = data.message.join("\n");
+            } else if (typeof data.message === "string") {
+              msg = data.message;
+            }
+          }
+  
+          setAlertMessage(msg);
+          setAlertSeverity("error");
+          setAlertOpen(true);
+  
+          // ❌ faqat register xatolik bo‘lsa register sahifasiga qaytariladi
+          setTimeout(() => {
+            router.replace("/register");
+          }, 22000);
+        } else {
+          setAlertMessage("Ro'yxatdan o'tishda noma'lum xatolik yuz berdi");
+          setAlertSeverity("error");
+          setAlertOpen(true);
+  
+          setTimeout(() => {
+            router.replace("/register");
+          }, 22000);
+        }
       }
-      setAlertSeverity("error");
-      setAlertOpen(true);
     } finally {
       setSubmitting(false);
     }
   };
+  
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-6">
