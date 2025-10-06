@@ -354,9 +354,9 @@ const App = () => {
     repeatPassword: "",
   });
 
-let router = useRouter()
+const router = useRouter()
 
-let {setUser} = useUserStore()
+const {setUser} = useUserStore()
 
 
   const [errors, setErrors] = useState<Errors>({});
@@ -401,6 +401,7 @@ let {setUser} = useUserStore()
   const handleMonthChange = useCallback((monthNumber: number) => {
     setForm(prevForm => ({ ...prevForm, month: monthNumber }));
   }, []);
+
 
  
   const validate = useCallback((): Errors => {
@@ -466,7 +467,7 @@ let {setUser} = useUserStore()
 
       setUser({...form,day:Number(form.day),month:Number(form.month),age:Number(form.age)})
 
-      let res = await axios.post(
+      const res = await axios.post(
         "https://faxriddin.bobur-dev.uz/verification/send",
         {email:form.email,type:"register"}, 
        
