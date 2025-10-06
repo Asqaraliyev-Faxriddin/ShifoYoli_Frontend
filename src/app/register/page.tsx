@@ -1,9 +1,7 @@
 "use client";
 
 
-import React, { useState, useCallback, useMemo } from 'react';
-
-// --- Type Definitions ---
+import React, { useState, useCallback, useMemo, ReactNode } from 'react';
 
 type Lang = "uz" | "en" | "ru";
 
@@ -17,6 +15,7 @@ type FormData = {
   password: string;
   repeatPassword: string;
 };
+
 
 
 // --- Translation Data ---
@@ -62,7 +61,7 @@ const translations: Record<Lang, Record<string, string>> = {
     note: "Parol kamida 6 ta belgidan iborat bo‘lishi kerak. Email yagona bo‘lishi kerak.",
     registerToContinue: "Davom etish uchun ro‘yxatdan o‘ting",
     selectMonth: "Oyni tanlang",
-    formError: "Formada xatolik mavjud!",
+    formError: "Kiritilgan malumotlarda xatolik mavjud!",
     successMsg: "Ro‘yxatdan o‘tish muvaffaqiyatli. Code yuborish simulyatsiya qilindi.",
     errorMsg: "Xatolik yuz berdi. Iltimos, qayta urinib ko‘ring.",
   },
@@ -87,7 +86,7 @@ const translations: Record<Lang, Record<string, string>> = {
     note: "Password must be at least 6 characters. Email must be unique.",
     registerToContinue: "Register to continue",
     selectMonth: "Select Month",
-    formError: "Form has validation errors!",
+    formError: "There are errors in the entered data!",
     successMsg: "Registration successful. Code sending simulated.",
     errorMsg: "An error occurred. Please try again.",
   },
@@ -112,7 +111,7 @@ const translations: Record<Lang, Record<string, string>> = {
     note: "Пароль должен содержать не менее 6 символов. Email должен быть уникальным.",
     registerToContinue: "Зарегистрируйтесь, чтобы продолжить",
     selectMonth: "Выберите месяц",
-    formError: "Форма содержит ошибки валидации!",
+    formError: "Введенные данные содержат ошибки!",
     successMsg: "Регистрация успешна. Отправка кода симулирована.",
     errorMsg: "Произошла ошибка. Пожалуйста, попробуйте снова.",
   },
@@ -275,38 +274,68 @@ const MonthDropdown: React.FC<MonthDropdownProps> = ({ label, lang, value, onCha
 // --- Alert/Snackbar Replacement ---
 
 type CustomAlertProps = {
-    message: string;
-    severity: 'success' | 'error';
+    message: ReactNode;   // string emas, ReactNode
+    severity: "success" | "error";
     onClose: () => void;
-};
+  };
 
-const CustomAlert: React.FC<CustomAlertProps> = ({ message, severity, onClose }) => {
-    const bgColor = severity === 'success' ? 'bg-green-500' : 'bg-red-500';
-
-    return (
-        <div 
-            className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 p-4 rounded-lg shadow-2xl text-white font-medium flex items-center transition-opacity duration-300`}
-            style={{ minWidth: '300px' }}
+  
+  const CustomAlert: React.FC<CustomAlertProps> = ({ message, severity, onClose }) => {
+    const baseClasses =
+      severity === "success"
+        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100"
+        : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100";
+  
+    const icon =
+      severity === "success" ? (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         >
-            <div className={`p-2 rounded-full mr-3 ${bgColor}`}>
-                {severity === 'success' ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><path d="M22 4L12 14.01l-3-3" />
-                    </svg>
-                ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />
-                    </svg>
-                )}
-            </div>
-            <span>{message}</span>
-            <button onClick={onClose} className="ml-auto text-white opacity-80 hover:opacity-100 transition">
-                &times;
-            </button>
-        </div>
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <path d="M22 4L12 14.01l-3-3" />
+        </svg>
+      ) : (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-5 w-5"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="15" y1="9" x2="9" y2="15" />
+          <line x1="9" y1="9" x2="15" y2="15" />
+        </svg>
+      );
+  
+    return (
+      <div
+        className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-4 py-3 rounded-lg shadow-2xl font-medium flex items-center gap-3 transition-opacity duration-300 ${baseClasses}`}
+        style={{ minWidth: "300px" }}
+        role="alert"
+      >
+        {icon}
+        <span className="flex-1">{message}</span>
+        <button
+          onClick={onClose}
+          className="ml-auto opacity-70 hover:opacity-100 transition"
+        >
+          &times;
+        </button>
+      </div>
     );
-};
-
+  };
+  
 
 // --- Main App Component ---
 
@@ -623,7 +652,30 @@ const App = () => {
                 </div>
             ) : t.register}
           </button>
+
+
+
+
+
         </form>
+
+
+                  {/* Google Sign Up */}
+                  <div className="mt-4">
+  <button
+    onClick={() => window.location.href = "https://faxriddin.bobur-dev.uz/auth/google"}
+    className="w-full flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+  >
+    <img
+      src="/img/icons8-google-48.png"
+      alt="Google"
+      className="w-5 h-5"
+    />
+    <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+      Google orqali kirish
+    </span>
+  </button>
+</div>
 
         <div className="mt-6 text-center">
           <a
@@ -636,14 +688,19 @@ const App = () => {
         </div>
       </div>
       
-      {/* Custom Alert (Snackbar replacement) */}
       {alertOpen && (
-          <CustomAlert
-              message={alertMessage}
-              severity={alertSeverity}
-              onClose={() => setAlertOpen(false)}
-          />
-      )}
+  <CustomAlert
+    message={
+      <span className="text-gray-800 dark:text-gray-200">
+        {alertMessage}
+      </span>
+    }
+    severity={alertSeverity}
+    onClose={() => setAlertOpen(false)}
+  />
+)}
+
+
     </div>
   );
 }
