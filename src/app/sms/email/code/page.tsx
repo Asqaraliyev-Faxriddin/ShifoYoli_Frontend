@@ -137,7 +137,7 @@ export default function VerifyPage() {
   
     try {
       // 1) verification/verify
-      let vdata: any;
+      let vdata;
       try {
         const verifyRes = await axios.post<VerifyResponse>(
           "https://faxriddin.bobur-dev.uz/verification/verify",

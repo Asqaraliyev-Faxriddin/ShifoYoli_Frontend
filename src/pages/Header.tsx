@@ -20,7 +20,7 @@ export default function Header() {
 
   const menuItems = [
     { name: "Asosiy", path: "/" },
-    { name: "Biz haqimizda", path: "/my" },
+    { name: "Biz haqimizda", path: "/contact" },
     { name: "Bog'lanish", path: "/boglanish" },
   ];
 
