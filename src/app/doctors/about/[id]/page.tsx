@@ -378,7 +378,7 @@ const DoctorDetailPage: React.FC = () => {
 
 
 
-        <button className="bg-blue-600 text-[18px] mt-[40px] text-white rounded-[15px] hover:cursor-pointer py-[8px] pl-[8px] pr-[8px] px-[8px]" onClick={()=> router.push("profile/doctor") }>Shifokor bilan suhbatlashish</button>
+        <button className="bg-blue-600 text-[18px] mt-[40px] text-white rounded-[15px] hover:cursor-pointer py-[8px] pl-[8px] pr-[8px] px-[8px]" onClick={()=> router.push("http://localhost:3000/doctor/profile/about") }>Shifokor bilan suhbatlashish</button>
 
       </Box>
 
