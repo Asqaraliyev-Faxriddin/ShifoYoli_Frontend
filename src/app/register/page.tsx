@@ -431,7 +431,7 @@
     
         if (dayNum > 29 && monthNum === 2) {
         errs.day = "Fevralda bunday kun yo'q.";
-        //    @ts-expect-error
+       // @ts-expect-error – dayNum va monthNum o‘zgaruvchilari uchun TypeScript aniqlik xatosini e’tiborsiz qoldiramiz
         } else if (dayNum === 31 && [4, 6, 9, 11].includes(monthNum)) {
         errs.day = "Bu oyda 31 kun yo'q.";
         }

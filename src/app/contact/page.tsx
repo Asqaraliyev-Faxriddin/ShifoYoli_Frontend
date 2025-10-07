@@ -108,12 +108,12 @@ const Home: React.FC = () => {
         >
           <Box sx={{ flex: 1 }}>
             <Typography variant="h3" fontWeight="bold" gutterBottom color="primary">
-              ShifoYoli: Sog‘ligingizga E'tiborli Yo‘l
+              ShifoYoli: Sog'ligingizga E'tiborli Yo'l
             </Typography>
             <Typography sx={{ fontSize: "1.125rem", opacity: 0.9 }}>
               ShifoYoli kompaniyasi bemorlarga qulay va tezkor tibbiy xizmatlarni taqdim etish
               maqsadida tashkil etilgan. Bizning asosiy faoliyatimiz: Yuqori malakali doktorlarni
-              topish, onlayn konsultatsiyalar va sog‘liqni saqlash sohasida innovatsion yechimlar.
+              topish, onlayn konsultatsiyalar va sog'liqni saqlash sohasida innovatsion yechimlar.
             </Typography>
           </Box>
           <Box sx={{ flex: 1 }}>
