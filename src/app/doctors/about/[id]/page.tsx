@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import {  useParams } from "next/navigation";
+import {  useRouter } from "next/navigation";
+
 import axios from "axios";
 import {
   Box,
@@ -63,7 +65,7 @@ const formatPrice = (priceString: string | null | undefined): string => {
 
     // O'zbek so'mi formatida chiroyli qilib formatlash
     return new Intl.NumberFormat('uz-UZ', { 
-      style: 'currency', 
+      style:'decimal', 
       currency: 'UZS', 
       maximumFractionDigits: 0 
     }).format(price).replace('UZS', "so'm").trim();
@@ -103,7 +105,7 @@ const DoctorDetailPage: React.FC = () => {
         const doctorData = res.data.data;
 
         if (!doctorData) {
-          router.push("/doctors");
+          router.push("/");
           return;
         }
         
@@ -111,7 +113,7 @@ const DoctorDetailPage: React.FC = () => {
       })
       .catch((err) => {
         console.error("Shifokor ma'lumotlarini yuklashda xato:", err);
-        router.push("/doctors");
+        router.push("/");
       })
       .finally(() => setLoading(false));
   }, [doctorId, router]);
@@ -240,14 +242,14 @@ const DoctorDetailPage: React.FC = () => {
           
           <Box sx={{ mt: 4 }}>
             <Typography variant="body2" color={isDark ? "#ccc" : "textSecondary"} sx={{ mb: 1 }}>
-              **Email:** {doctor.email}
+              Email: {doctor.email}
             </Typography>
             {/* Kunlik va Oylik narxlarni ko'rsatish */}
             <Typography variant="body2" color={isDark ? "#ccc" : "textSecondary"} sx={{ mb: 1 }}>
-              **Kunlik Narx:** **{dailySalary}**
+              Kunlik Narx: {`${dailySalary} so'm`}
             </Typography>
             <Typography variant="body2" color={isDark ? "#ccc" : "textSecondary"}>
-              **Oylik Narx (Taxminiy):** **{monthlySalary}**
+              Oylik Narx : {` ${monthlySalary} so'm`}
             </Typography>
           </Box>
         </Box>
@@ -271,7 +273,7 @@ const DoctorDetailPage: React.FC = () => {
             </Typography>
             <Box component="ul" sx={{ pl: 2, listStyleType: "disc" }}>
               {futures.map((f, i) => (
-                <li key={i}>
+                <li key={i} className="list-none">
                   <Typography variant="body1" sx={{ py: 0.5 }}>{f}</Typography>
                 </li>
               ))}
@@ -282,14 +284,7 @@ const DoctorDetailPage: React.FC = () => {
         {/* Doktor Rasmlari (Galereya) */}
         {doctorImages.length > 0 && (
           <Box sx={{ mt: 6 }}>
-            <Typography
-              variant="h5"
-              fontWeight="bold"
-              gutterBottom
-              sx={{ color: isDark ? "#60a5fa" : "primary.main" }}
-            >
-              Doktor Rasmlari (Galereya)
-            </Typography>
+          
             <Grid container spacing={3}>
              {/* Rasmlar */}
 {doctorImages.length > 0 && (
@@ -380,6 +375,10 @@ const DoctorDetailPage: React.FC = () => {
             </Typography>
           </Box>
         )}
+
+
+
+        <button className="bg-blue-600 text-[18px] mt-[40px] text-white rounded-[15px] hover:cursor-pointer py-[8px] pl-[8px] pr-[8px] px-[8px]" onClick={()=> router.push("profile/doctor") }>Shifokor bilan suhbatlashish</button>
 
       </Box>
 
