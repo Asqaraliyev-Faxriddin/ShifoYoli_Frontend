@@ -141,14 +141,13 @@ const DoctorDetailPage: React.FC = () => {
   const category = doctor.doctorProfile?.category?.name || "Shifokor";
   const profileImgUrl = doctor.profileImg || "https://via.placeholder.com/400x400";
 
-  // Ma'lumotlarni tayyorlash
+  
   const doctorImages = doctor.doctorProfile?.images?.map(imagePath => `${BASE_URL}/${imagePath}`) || [];
   const futures = doctor.doctorProfile?.futures || [];
   const videos = doctor.doctorProfile?.videos || [];
   const files = doctor.doctorProfile?.files || [];
   
-  // Narx ma'lumotlarini olish
-  const salaryData = doctor.doctorProfile?.salary?.[0]; // Faqat birinchi (0-indexdagi) obyektni olamiz
+  const salaryData = doctor.doctorProfile?.salary?.[0]; 
   const monthlySalary = formatPrice(salaryData?.monthly);
   const dailySalary = formatPrice(salaryData?.daily);
 
@@ -184,7 +183,7 @@ const DoctorDetailPage: React.FC = () => {
         }}
       >
         {/* Rasm (Chap qism) */}
-        <Box sx={{ flex: 1, minWidth: { md: 350 } }}>
+        <Box sx={{ flex: 2, minWidth: { md: 350 } }}>
           <Card
             sx={{
               borderRadius: 3,
@@ -209,7 +208,7 @@ const DoctorDetailPage: React.FC = () => {
         </Box>
 
         {/* Ma'lumotlar (O'ng qism) */}
-        <Box sx={{ flex: 2 }}>
+        <Box sx={{ flex: 1 }}>
           <Typography
             variant="h4"
             fontWeight="bold"
@@ -268,7 +267,7 @@ const DoctorDetailPage: React.FC = () => {
               gutterBottom
               sx={{ color: isDark ? "#60a5fa" : "primary.main" }}
             >
-              Sertifikatlar va Kurslar
+              Qo'shimcha malumotlar
             </Typography>
             <Box component="ul" sx={{ pl: 2, listStyleType: "disc" }}>
               {futures.map((f, i) => (
