@@ -2,8 +2,17 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Box, Typography, Card, CardMedia, CardContent, CircularProgress, Button } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Card,
+  CardMedia,
+  CardContent,
+  CircularProgress,
+  Button,
+} from "@mui/material";
 import Slider from "react-slick";
+import { useRouter } from "next/navigation";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { useUserStore } from "@/store/UseUserStore";
@@ -36,6 +45,7 @@ const Home: React.FC = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  const router = useRouter();
   const limit = 10;
 
   const fetchDoctors = async (pageNumber = 1) => {
@@ -44,7 +54,7 @@ const Home: React.FC = () => {
       const res = await axios.get<DoctorsResponse>(
         `https://faxriddin.bobur-dev.uz/User/doctors/All?limit=${limit}&page=${pageNumber}`
       );
-      setDoctors((prev) => [...prev, ...res.data.data]);
+      setDoctors(res.data.data);
       setTotalPages(res.data.meta.totalPages);
       setPage(pageNumber);
     } catch (err) {
@@ -72,7 +82,7 @@ const Home: React.FC = () => {
   };
 
   return (
-    <Box sx={{ bgcolor: isDark ? "#121212" : "#fff", color: isDark ? "#fff" : "#000" }}>
+    <Box sx={{ bgcolor: isDark ? "#0b1321" : "#fff", color: isDark ? "#fff" : "#000" }}>
       <Header />
 
       {/* Biz haqimizda */}
@@ -81,7 +91,9 @@ const Home: React.FC = () => {
           py: 20,
           pt: 32,
           px: 4,
-          background: isDark ? "linear-gradient(to bottom, #1a1a1a, #333)" : "linear-gradient(to bottom, #fff, #f2f2f2)",
+          background: isDark
+            ? "#0b1321"
+            : "linear-gradient(to bottom, #fff, #f2f2f2)",
         }}
       >
         <Box
@@ -116,7 +128,13 @@ const Home: React.FC = () => {
 
       {/* Tajribali Doktorlar */}
       <Box sx={{ py: 16, px: 4 }}>
-        <Typography variant="h4" align="center" fontWeight="bold" color="primary" sx={{ mb: 4 }}>
+        <Typography
+          variant="h4"
+          align="center"
+          fontWeight="bold"
+          color="primary"
+          sx={{ mb: 4 }}
+        >
           Bizning Tajribali Doktorlarimiz
         </Typography>
 
@@ -140,23 +158,27 @@ const Home: React.FC = () => {
                 <Box key={doctor.id} px={1}>
                   <Card
                     sx={{
-                      borderRadius: 3,
+                      borderRadius: "20px",
                       overflow: "hidden",
                       position: "relative",
                       transition: "0.3s",
-                      maxWidth: 400,
+                      maxWidth: 425,
                       mx: "auto",
                       bgcolor: isDark ? "#120C0B" : "#fff",
                       color: isDark ? "#fff" : "#000",
+                      boxShadow: isDark
+                        ? "0 6px 12px rgba(0,0,0,0.5)"
+                        : "0 6px 12px rgba(0,0,0,0.1)",
                       "&:hover .hoverBox": { opacity: 1 },
-                      boxShadow: "0 6px 12px rgba(0,0,0,0.1)",
+                      cursor: "pointer",
                     }}
+                    onClick={() => router.push(`/doctors/about/${doctor.id}`)}
                   >
                     <CardMedia
                       component="img"
                       image={img}
                       alt={fullName}
-                      sx={{ height: 320, objectFit: "cover" }}
+                      sx={{ height: 320, objectFit: "cover", filter: isDark ? "brightness(0.9)" : "none" }}
                     />
                     <CardContent sx={{ textAlign: "center", pt: 2, pb: 3 }}>
                       <Typography variant="h6" fontWeight="bold">
@@ -171,7 +193,10 @@ const Home: React.FC = () => {
                           py: 0.5,
                           borderRadius: "12px",
                           fontWeight: 500,
-                          backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
+                          color: isDark ? "#ccc" : "#555",
+                          backgroundColor: isDark
+                            ? "rgba(255,255,255,0.1)"
+                            : "rgba(0,0,0,0.05)",
                         }}
                       >
                         {category}
@@ -190,13 +215,24 @@ const Home: React.FC = () => {
                         p: 2,
                         opacity: 0,
                         transition: "opacity 0.3s ease-in-out",
-                        borderRadius: "0 0 16px 16px",
+                        borderRadius: "0 0 20px 20px",
                         minHeight: 80,
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
                       }}
                     >
                       <Typography variant="body2" gutterBottom noWrap>
                         {bio}
                       </Typography>
+                      <Button
+                        variant="contained"
+                        size="small"
+                        sx={{ mt: 1, alignSelf: "flex-start" }}
+                        onClick={() => router.push(`/doctors/about/${doctor.id}`)}
+                      >
+                        Batafsil
+                      </Button>
                     </Box>
                   </Card>
                 </Box>
@@ -205,7 +241,6 @@ const Home: React.FC = () => {
           </Slider>
         )}
 
-        {/* Ko‘proq ko‘rish tugmasi */}
         {page < totalPages && !loading && (
           <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
             <Button variant="contained" color="primary" onClick={() => fetchDoctors(page + 1)}>
