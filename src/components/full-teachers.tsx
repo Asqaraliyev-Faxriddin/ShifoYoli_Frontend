@@ -38,7 +38,7 @@ interface DoctorsResponse {
   meta: { total: number; page: number; limit: number; totalPages: number };
 }
 
-const Home: React.FC = () => {
+const FullTeachers: React.FC = () => {
   const { isDark } = useUserStore();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
@@ -83,57 +83,9 @@ const Home: React.FC = () => {
 
   return (
     <Box sx={{ bgcolor: isDark ? "#0b1321" : "#fff", color: isDark ? "#fff" : "#000" }}>
-      <Header />
 
       {/* Biz haqimizda */}
-      <Box
-        sx={{
-          py: 20,
-          pt: 22,
-          px: 4,
-          background: isDark
-            ? "#0b1321"
-            : "linear-gradient(to bottom, #fff, #f2f2f2)",
-        }}
-      >
-        <Box
-          sx={{
-            maxWidth: 1200,
-            mx: "auto",
-            display: "flex",
-            flexDirection: { xs: "column", md: "row" },
-            gap: 10,
-            alignItems: "center",
-          }}
-        >
-          <Box sx={{ flex: 1 }}>
-            <Typography sx={{ fontSize: "30px", fontWeight: "bold", color: "primary.main" }} variant="h4" fontWeight="bold" gutterBottom color="primary">
-              ShifoYoli Sog'ligingizga   E'tiborli Yo'l
-            </Typography>
-            <Typography sx={{ fontSize: "1.22rem", opacity: 0.9 }}>
-              ShifoYoli kompaniyasi bemorlarga qulay va tezkor tibbiy xizmatlarni taqdim etish
-              maqsadida tashkil etilgan. Bizning asosiy faoliyatimiz: Yuqori malakali doktorlarni
-              topish, onlayn konsultatsiyalar va sog'liqni saqlash sohasida innovatsion yechimlar.
-            </Typography>
-          </Box>
-          <Box sx={{ flex: 1 }}>
-  <img
-    src="./img/chiroyli.jpg"
-    alt="Tibbiy xizmatlar"
-    style={{
-      width: "100%",        // mobil va kichik ekranlarda 100% kenglik
-      maxWidth: "400px",    // katta ekranlarda maksimal kenglik
-      height: "auto",       // balandlikni rasmga moslashtiradi
-      borderRadius: 16,
-      boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
-      display: "block",
-      margin: "0 auto",
-    }}
-  />
-</Box>
 
-        </Box>
-      </Box>
 
       {/* Tajribali Doktorlar */}
       <Box sx={{ py: 16, px: 4 }}>
@@ -144,7 +96,7 @@ const Home: React.FC = () => {
           color="primary"
           sx={{ mb: 4 }}
         >
-          Bizning Tajribali Doktorlarimiz
+          Bizning Barcha Doktorlarimiz
         </Typography>
 
         {loading ? (
@@ -259,9 +211,8 @@ const Home: React.FC = () => {
         )}
       </Box>
 
-      <Footer />
     </Box>
   );
 };
 
-export default Home;
+export default FullTeachers;

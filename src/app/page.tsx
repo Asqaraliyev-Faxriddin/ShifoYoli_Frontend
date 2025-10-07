@@ -1,6 +1,7 @@
 "use client"
 
 
+import FullTeachers from "@/components/full-teachers";
 import TopDoctors from "@/components/teachers";
 import Footer from "@/pages/Footer";
 import Header from "@/pages/Header";
@@ -107,6 +108,11 @@ export default function Home() {
 
   </div>
 </section>
+
+
+    <section className={`${isDark ? "bg-gray-900 text-white" : "bg-white text-black"} py-10 px-4`}>
+      <FullTeachers/>
+    </section>
 
 
 

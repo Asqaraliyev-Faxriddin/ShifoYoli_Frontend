@@ -4,11 +4,11 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Slider from "react-slick";
 import {
-  Card,
-  CardContent,
-  CardMedia,
-  Typography,
   Box,
+  Typography,
+  Card,
+  CardMedia,
+  CardContent,
   CircularProgress,
   Button,
 } from "@mui/material";
@@ -46,7 +46,7 @@ const TopDoctors: React.FC = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const settings = {
+  const sliderSettings = {
     dots: true,
     infinite: true,
     autoplay: true,
@@ -66,61 +66,29 @@ const TopDoctors: React.FC = () => {
           py: 10,
           minHeight: 300,
           display: "flex",
-          alignItems: "center",
           justifyContent: "center",
+          alignItems: "center",
           bgcolor: isDark ? "#0b1321" : "#fff",
         }}
       >
-        <CircularProgress color="inherit" />
+        <CircularProgress />
       </Box>
     );
   }
 
   return (
-    <Box
-      sx={{
-        py: 10,
-        px: { xs: 2, md: 6 },
-        bgcolor: isDark ? "#0b1321" : "#fff",
-        color: isDark ? "#f1f5f9" : "#111827",
-      }}
-      className="top-doctors-section"
-    >
-      {/* Slick style overrides */}
-      <style jsx>{`
-        .top-doctors-section :global(.slick-dots li button:before) {
-          color: ${isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)"};
-          opacity: 1;
-        }
-        .top-doctors-section :global(.slick-dots li.slick-active button:before) {
-          color: #3b82f6;
-        }
-        .top-doctors-section :global(.slick-prev),
-        .top-doctors-section :global(.slick-next) {
-          width: 36px;
-          height: 36px;
-          z-index: 4;
-          background: ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"};
-          border-radius: 999px;
-        }
-        .top-doctors-section :global(.slick-prev:before),
-        .top-doctors-section :global(.slick-next:before) {
-          color: ${isDark ? "#cbd5e1" : "#111827"};
-          font-size: 18px;
-        }
-      `}</style>
-
+    <Box sx={{ py: 10, px: { xs: 2, md: 6 }, bgcolor: isDark ? "bg-gray-900" : "#fff" }}>
       <Typography
         variant="h4"
         align="center"
+        fontWeight="bold"
         gutterBottom
-        fontWeight="700"
-        sx={{ mb: 4, color: isDark ? "#60a5fa" : "primary.main" }}
+        sx={{ mb: 6, color: isDark ? "#60a5fa" : "primary.main" }}
       >
         Eng zo‘r Shifokorlar
       </Typography>
 
-      <Slider {...settings}>
+      <Slider {...sliderSettings}>
         {doctors.map((doctor) => {
           const fullName = `${doctor.firstName} ${doctor.lastName}`;
           const category = doctor.doctorProfile?.category?.name || "Shifokor";
@@ -131,119 +99,85 @@ const TopDoctors: React.FC = () => {
               ? doctor.profileImg
               : doctor.doctorProfile?.images?.[0]
               ? `https://faxriddin.bobur-dev.uz/${doctor.doctorProfile.images[0]}`
-              : "https://via.placeholder.com/800x800";
+              : "https://via.placeholder.com/400x400";
 
           return (
-            <Box key={doctor.id} px={1} sx={{ py: 2 }}>
+            <Box key={doctor.id} px={1}>
               <Card
-                onClick={() => router.push(`/doctors/about/${doctor.id}`)}
                 sx={{
-                  borderRadius: "20px",
-                  overflow: "visible",
                   position: "relative",
-                  width: "100%",
-                  maxWidth: 440,
+                  maxWidth: 420,
                   mx: "auto",
-                  transition: "transform .25s ease, box-shadow .25s ease",
-                  bgcolor: isDark ? "#0f1724" : "#fff",
-                  color: isDark ? "#f8fafc" : "#0f1720",
+                  borderRadius: "20px",
+                  overflow: "hidden",
+                  cursor: "pointer",
+                  transition: "0.3s",
+                  bgcolor: isDark ? "#120C0B" : "#fff",
+                  color: isDark ? "#fff" : "#000",
                   boxShadow: isDark
-                    ? "0 10px 30px rgba(2,6,23,0.6)"
-                    : "0 6px 18px rgba(13,38,59,0.06)",
-                  "&:hover": { transform: "translateY(-6px)" },
-                  "&:hover .hoverBox": { opacity: 1, transform: "translateY(0)" },
+                    ? "0 6px 12px rgba(0,0,0,0.5)"
+                    : "0 6px 12px rgba(0,0,0,0.1)",
+                  "&:hover .hoverBox": { opacity: 1 },
+                  "&:hover": { transform: "translateY(-5px)" },
                 }}
+                onClick={() => router.push(`/doctors/about/${doctor.id}`)}
               >
-                {/* Image */}
-                <Box
+                <CardMedia
+                  component="img"
+                  image={img}
+                  alt={fullName}
                   sx={{
-                    width: "100%",
-                    height: 360,
-                    overflow: "hidden",
-                    borderTopLeftRadius: "20px",
-                    borderTopRightRadius: "20px",
-                    position: "relative",
+                    height: 320,
+                    objectFit: "cover",
+                    filter: isDark ? "brightness(0.9)" : "none",
                   }}
-                >
-                  <CardMedia
-                    component="img"
-                    image={img}
-                    alt={fullName}
-                    sx={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      display: "block",
-                    }}
-                  />
-                </Box>
+                />
 
-                {/* Rounded bottom panel overlapping image (like screenshot) */}
-                <Box
-                  sx={{
-                    mt: -6,
-                    mx: 2,
-                    borderRadius: "14px",
-                    bgcolor: isDark ? "#08121a" : "#f8fafc",
-                    px: 3,
-                    py: 3,
-                    boxShadow: isDark
-                      ? "0 -8px 30px rgba(2,6,23,0.5) inset"
-                      : "none",
-                  }}
-                >
-                  <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
+                <CardContent sx={{ textAlign: "center", pt: 2, pb: 3 }}>
+                  <Typography variant="h6" fontWeight="bold">
                     {fullName}
                   </Typography>
+                  <Typography
+                    sx={{
+                      display: "inline-block",
+                      px: 2,
+                      py: 0.5,
+                      borderRadius: "12px",
+                      fontWeight: 500,
+                      fontSize: 12,
+                      color: isDark ? "#ccc" : "#555",
+                      backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
+                    }}
+                  >
+                    {category}
+                  </Typography>
+                </CardContent>
 
-                  <Box sx={{ display: "flex", justifyContent: "center" }}>
-                    <Box
-                      sx={{
-                        px: 1.8,
-                        py: 0.5,
-                        borderRadius: "999px",
-                        fontSize: 12,
-                        fontWeight: 600,
-                        backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
-                        color: isDark ? "#cbd5e1" : "#374151",
-                      }}
-                    >
-                      {category}
-                    </Box>
-                  </Box>
-                </Box>
-
-                {/* hover overlay (hidden by default) */}
                 <Box
                   className="hoverBox"
                   sx={{
                     position: "absolute",
-                    inset: 0,
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    bgcolor: "rgba(0,0,0,0.75)",
+                    color: "#fff",
+                    p: 2,
+                    opacity: 0,
+                    transition: "opacity 0.3s ease-in-out",
+                    borderRadius: "0 0 20px 20px",
                     display: "flex",
                     flexDirection: "column",
-                    justifyContent: "flex-end",
-                    p: 3,
-                    bgcolor: "linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.7) 100%)",
-                    opacity: 0,
-                    transform: "translateY(6px)",
-                    transition: "opacity 0.25s ease, transform 0.25s ease",
-                    borderRadius: "20px",
-                    color: "#fff",
-                    pointerEvents: "none", // keep click to card
                   }}
                 >
-                  <Typography variant="body2" sx={{ mb: 1 }} noWrap>
+                  <Typography variant="body2" gutterBottom noWrap>
                     {bio}
                   </Typography>
-                  <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <Button
-                      size="small"
                       variant="contained"
-                      sx={{
-                        backgroundColor: "#3b82f6",
-                        "&:hover": { backgroundColor: "#2563eb" },
-                        pointerEvents: "auto",
-                      }}
+                      size="small"
+                      sx={{ mt: 1 }}
                       onClick={(e) => {
                         e.stopPropagation();
                         router.push(`/doctors/about/${doctor.id}`);
@@ -251,9 +185,7 @@ const TopDoctors: React.FC = () => {
                     >
                       Batafsil
                     </Button>
-                    <Box sx={{ ml: "auto", color: "rgba(255,255,255,0.85)", fontWeight: 700 }}>
-                      Oylik: {salary} so‘m
-                    </Box>
+                    <Box sx={{ fontWeight: 700, mt: 1 }}>Oylik: {salary} so‘m</Box>
                   </Box>
                 </Box>
               </Card>
@@ -266,4 +198,3 @@ const TopDoctors: React.FC = () => {
 };
 
 export default TopDoctors;
-
