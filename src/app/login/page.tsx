@@ -88,7 +88,8 @@ export default function LoginForm() {
         setAlertSeverity("success");
         setAlertOpen(true);
 
-        router.push("/profile");
+        
+        router.push("/doctor/profile/about");
       } else {
         setAlertMessage(res.data.message || "Kirish muvaffiyatsiz");
         setAlertSeverity("error");
@@ -112,10 +113,9 @@ export default function LoginForm() {
         }
       }
 
-      // ✅ Agar email yoki password xato bo‘lsa — field ostida chiqsin
-      if (msg.toLowerCase().includes("email")) {
+      if ( typeof msg =="string" && msg.toLowerCase().includes("email")) {
         setEmailError(msg);
-      } else if (msg.toLowerCase().includes("password")) {
+      } else if (typeof msg =="string" && msg.toLowerCase().includes("password")) {
         setPasswordError(msg);
       } else {
         setAlertMessage(msg);

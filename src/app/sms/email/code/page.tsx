@@ -216,7 +216,7 @@ export default function VerifyPage() {
         setAlertSeverity("success");
         setAlertOpen(true);
   
-        router.push("/profile");
+        router.push("/doctor/profile/about");
       } catch (error) {
         if (axios.isAxiosError(error)) {
           const data = error.response?.data;
