@@ -89,6 +89,7 @@ export default function ProfileLayout() {
     if (role === "BEMOR") {
       return [
         baseMenus.home,
+      baseMenus.kategoriyalar,
         baseMenus.shifokorlar,
         baseMenus.izohlar,
         baseMenus.xabarlashish,

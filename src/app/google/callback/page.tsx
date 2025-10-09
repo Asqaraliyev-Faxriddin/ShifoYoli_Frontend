@@ -62,12 +62,24 @@ export default function GooglePasswordForm() {
   const [alertMessage, setAlertMessage] = useState("");
   const [alertSeverity, setAlertSeverity] = useState<AlertColor>("success");
 
+  function isBooloontrue(val:any){
+    if (val === "true" || val === true) return true;
+    if (val === "false" || val === false) return false;
+    return undefined;
+
+  }
+
   // ✅ querydan tokenlarni olish
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const access = params.get("accessToken");
       const refresh = params.get("refreshToken");
+      const isvalid = params.get("isValid");
+
+      const rut = isBooloontrue(isvalid)
+
+        
 
       if (access) {
         setAccessToken(access);
@@ -77,11 +89,20 @@ export default function GooglePasswordForm() {
         localStorage.setItem("refreshToken", refresh);
       }
 
+
+      
+      if(rut == true){
+        router.push("/doctor/profile/about")
+      }
+
+
       // accestoken yoki ekkalasidan biri bolmasa refresh tokenni tekshirish
       if(!access || !refresh) {
         setAlertMessage("Noto'g'ri so'rov");
         setAlertSeverity("error");
         setAlertOpen(true);
+
+        router.replace("/login")
 
         router.back(); 
       }
