@@ -408,9 +408,7 @@ export default function ProfileLayout() {
               >
                 <img
                   src={
-                    user?.profileImg 
-                      ? `https://faxriddin.bobur-dev.uz/profile/url/${user.profileImg}`
-                      : "/img/user.png"
+                    user?.profileImg ? `https://faxriddin.bobur-dev.uz/profiles/url/${user.profileImg}`: "/img/user.png"
                   }
                   alt="user"
                   className="w-10 h-10 rounded-full object-cover border-2 border-orange-500"
