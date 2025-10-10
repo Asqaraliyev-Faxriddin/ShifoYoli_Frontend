@@ -159,7 +159,7 @@ export default function ProfileLayout() {
     async function fetchProfile() {
       try {
         const token = localStorage.getItem("accessToken");
-        if (!token) return router.push("/");
+        if (!token) return router.push("/login");
 
         const { data } = await axios.get("https://faxriddin.bobur-dev.uz/profile/my/profile", {
           headers: { Authorization: `Bearer ${token}` },
@@ -229,7 +229,7 @@ export default function ProfileLayout() {
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
-    router.push("/");
+    router.push("/login");
   };
 
   const handleMenuClick = (id: string) => {
