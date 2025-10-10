@@ -364,8 +364,9 @@ export default function ProfileLayout() {
                  isDark ? "text-white" : "text-gray-800"
                }`}
              >
-               {/* Role nomini chiroyli formatlash */}
-               {user && (user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase())} Panel
+       {user?.role? user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase(): "Bemor"
+} Panel
+
              </div>
           </div>
           
