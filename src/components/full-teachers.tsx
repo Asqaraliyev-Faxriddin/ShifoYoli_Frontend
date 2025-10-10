@@ -11,13 +11,15 @@ import {
   CircularProgress,
   Button,
 } from "@mui/material";
-import Slider from "react-slick";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
+import { useUserStore } from "@/store/UseUserStore";
+
+// Sliderni faqat client-side render qilish
+const Slider = dynamic(() => import("react-slick"), { ssr: false });
+
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { useUserStore } from "@/store/UseUserStore";
-import Header from "@/pages/Header";
-import Footer from "@/pages/Footer";
 
 interface DoctorProfile {
   bio: string;
@@ -29,7 +31,7 @@ interface Doctor {
   id: string;
   firstName: string;
   lastName: string;
-  profileImg: string;
+  profileImg?: string;
   doctorProfile?: DoctorProfile;
 }
 
@@ -82,136 +84,103 @@ const FullTeachers: React.FC = () => {
   };
 
   return (
-    <Box sx={{ bgcolor: isDark ? "#0b1321" : "#fff", color: isDark ? "#fff" : "#000" }}>
-
-      {/* Biz haqimizda */}
-
-
-      {/* Tajribali Doktorlar */}
-      <Box sx={{ py: 16, px: 4 }}>
-        <Typography
-          variant="h4"
-          align="center"
-          fontWeight="bold"
-          color="primary"
-          sx={{ mb: 4 }}
+    <Box
+    sx={{
+      display: "grid",
+      gap: 3,
+      gridTemplateColumns: {
+        xs: "1fr", // telefon
+        sm: "repeat(2, 1fr)", // planshet
+        md: "repeat(3, 1fr)", // kompyuter
+      },
+    }}
+  >
+    {doctors.map((doctor) => {
+      const fullName = `${doctor.firstName} ${doctor.lastName}`;
+      const bio = doctor.doctorProfile?.bio || "Ma'lumot mavjud emas";
+      const category = doctor.doctorProfile?.category?.name || "Shifokor";
+      const img = doctor.profileImg
+        ? doctor.profileImg
+        : doctor.doctorProfile?.images?.[0]
+        ? `https://faxriddin.bobur-dev.uz/${doctor.doctorProfile.images[0]}`
+        : "https://via.placeholder.com/400x400";
+  
+      return (
+        <Box key={doctor.id} sx={{ width: "100%", maxWidth: 400, mx: "auto" }}>
+        <Card
+          sx={{
+            borderRadius: "20px",
+            overflow: "hidden",
+            cursor: "pointer",
+            transition: "transform 0.3s, box-shadow 0.3s",
+            bgcolor: isDark ? "#120C0B" : "#fff",
+            color: isDark ? "#fff" : "#000",
+            boxShadow: isDark
+              ? "0 6px 12px rgba(0,0,0,0.5)"
+              : "0 6px 12px rgba(0,0,0,0.1)",
+            "&:hover": { transform: "translateY(-5px)" },
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
         >
-          Bizning Barcha Doktorlarimiz
-        </Typography>
-
-        {loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <Slider {...sliderSettings}>
-            {doctors.map((doctor) => {
-              const fullName = `${doctor.firstName} ${doctor.lastName}`;
-              const bio = doctor.doctorProfile?.bio || "Ma'lumot mavjud emas";
-              const category = doctor.doctorProfile?.category?.name || "Shifokor";
-              const img = doctor.profileImg
-                ? doctor.profileImg
-                : doctor.doctorProfile?.images?.[0]
-                ? `https://faxriddin.bobur-dev.uz/${doctor.doctorProfile.images[0]}`
-                : "https://via.placeholder.com/400x400";
-
-              return (
-                <Box key={doctor.id} px={1}>
-                  <Card
-                    sx={{
-                      borderRadius: "20px",
-                      overflow: "hidden",
-                      position: "relative",
-                      transition: "0.3s",
-                      maxWidth: 425,
-                      mx: "auto",
-                      bgcolor: isDark ? "#120C0B" : "#fff",
-                      color: isDark ? "#fff" : "#000",
-                      boxShadow: isDark
-                        ? "0 6px 12px rgba(0,0,0,0.5)"
-                        : "0 6px 12px rgba(0,0,0,0.1)",
-                      "&:hover .hoverBox": { opacity: 1 },
-                      cursor: "pointer",
-                    }}
-                    onClick={() => router.push(`/doctors/about/${doctor.id}`)}
-                  >
-                    <CardMedia
-                      component="img"
-                      image={img}
-                      alt={fullName}
-                      sx={{ height: 320, objectFit: "cover", filter: isDark ? "brightness(0.9)" : "none" }}
-                    />
-                    <CardContent sx={{ textAlign: "center", pt: 2, pb: 3 }}>
-                      <Typography variant="h6" fontWeight="bold">
-                        {fullName}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          mb: 1,
-                          display: "inline-block",
-                          px: 1.5,
-                          py: 0.5,
-                          borderRadius: "12px",
-                          fontWeight: 500,
-                          color: isDark ? "#ccc" : "#555",
-                          backgroundColor: isDark
-                            ? "rgba(255,255,255,0.1)"
-                            : "rgba(0,0,0,0.05)",
-                        }}
-                      >
-                        {category}
-                      </Typography>
-                    </CardContent>
-
-                    <Box
-                      className="hoverBox"
-                      sx={{
-                        position: "absolute",
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        bgcolor: "rgba(0,0,0,0.75)",
-                        color: "white",
-                        p: 2,
-                        opacity: 0,
-                        transition: "opacity 0.3s ease-in-out",
-                        borderRadius: "0 0 20px 20px",
-                        minHeight: 80,
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Typography variant="body2" gutterBottom noWrap>
-                        {bio}
-                      </Typography>
-                      <Button
-                        variant="contained"
-                        size="small"
-                        sx={{ mt: 1, alignSelf: "flex-start" }}
-                        onClick={() => router.push(`/doctors/about/${doctor.id}`)}
-                      >
-                        Batafsil
-                      </Button>
-                    </Box>
-                  </Card>
-                </Box>
-              );
-            })}
-          </Slider>
-        )}
-
-        {page < totalPages && !loading && (
-          <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
-            <Button variant="contained" color="primary" onClick={() => fetchDoctors(page + 1)}>
-              Ko‘proq ko‘rish
+          <CardMedia
+            component="img"
+            image={img}
+            alt={fullName}
+            sx={{
+              width: "100%",
+              height: 320,
+              objectFit: "cover",
+              filter: isDark ? "brightness(0.9)" : "none",
+            }}
+          />
+      
+          <CardContent sx={{ textAlign: "center", pt: 2, pb: 2 }}>
+            <Typography variant="h6" fontWeight="bold" gutterBottom>
+              {fullName}
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{
+                mb: 1,
+                display: "inline-block",
+                px: 1.5,
+                py: 0.5,
+                borderRadius: "12px",
+                fontWeight: 500,
+                color: isDark ? "#ccc" : "#555",
+                backgroundColor: isDark
+                  ? "rgba(255,255,255,0.1)"
+                  : "rgba(0,0,0,0.05)",
+              }}
+            >
+              {category}
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{ mt: 1, color: isDark ? "#ddd" : "#333" }}
+              noWrap
+            >
+              {doctor.doctorProfile?.bio || "Ma'lumot mavjud emas"}
+            </Typography>
+      
+            <Button
+              variant="contained"
+              size="small"
+              sx={{ mt: 2 }}
+              onClick={() => router.push(`/doctors/about/${doctor.id}`)}
+            >
+              Batafsil
             </Button>
-          </Box>
-        )}
+          </CardContent>
+        </Card>
       </Box>
-
-    </Box>
+      
+      );
+    })}
+  </Box>
+  
   );
 };
 

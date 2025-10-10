@@ -93,6 +93,7 @@ const DoctorDetailPage: React.FC = () => {
   if (!doctor) return null;
 
   const profile = doctor.doctorProfile;
+  const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
   const fullName = `${doctor.firstName} ${doctor.lastName}`;
   const category = profile?.category?.name || "Shifokor";
   const images = profile?.images?.map((p) => `${BASE_URL}/${p}`) || [];
@@ -242,7 +243,7 @@ const DoctorDetailPage: React.FC = () => {
           style={{
             borderRadius: "12px",
             overflow: "hidden",
-            width: "50%",
+            width: isMobile ? "100%" : "50%",
 
             boxShadow: isDark
               ? "0 4px 12px rgba(0,0,0,0.4)"
@@ -290,7 +291,7 @@ const DoctorDetailPage: React.FC = () => {
           style={{
             borderRadius: "12px",
             overflow: "hidden",
-            width: "50%",
+            width: isMobile ? "100%" : "50%",
 
             boxShadow: isDark
               ? "0 4px 12px rgba(0,0,0,0.4)"
@@ -299,18 +300,18 @@ const DoctorDetailPage: React.FC = () => {
           }}
         >
           <video
-            controls
-            style={{
-              width: "100%",
-              height: "280px", // 🔹 rasmlar bilan bir xil
-              objectFit: "cover",
-              borderRadius: "8px",
-              background: "#000",
-            }}
-          >
-            <source src={v} type="video/mp4" />
-            Brauzer videoni qo‘llamaydi.
-          </video>
+      controls
+      style={{
+        width: "100%",
+        height: "280px", // 🔹 rasmlar bilan bir xil
+        objectFit: "cover",
+        borderRadius: "8px",
+        background: "#000",
+      }}
+    >
+      <source src={v} type="video/mp4" />
+      Brauzer videoni qo‘llamaydi.
+    </video>
         </div>
       ))}
     </div>
