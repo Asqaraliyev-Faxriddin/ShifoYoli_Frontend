@@ -427,12 +427,11 @@
     
         const dayNum = Number(form.day);
         const monthNum = Number(form.month);
-        const arr : number[] = [4, 6, 9, 11]
-        
+        const arr: number[] = [4, 6, 9, 11];
+
         if (dayNum > 29 && monthNum === 2) {
           errs.day = "Fevralda bunday kun yo'q.";
-        //   @ts-ignore
-        } else if (dayNum === 31 && arr.includes(monthNum)) {
+        } else if (dayNum === 31 && arr.indexOf(monthNum) !== -1) {
           errs.day = "Bu oyda 31 kun yo'q.";
         }
         
