@@ -62,7 +62,7 @@ export default function GooglePasswordForm() {
   const [alertMessage, setAlertMessage] = useState("");
   const [alertSeverity, setAlertSeverity] = useState<AlertColor>("success");
 
-  function isBooloontrue(val:any){
+  function isBooloontrue(val: string | boolean | null): boolean | undefined {
     if (val === "true" || val === true) return true;
     if (val === "false" || val === false) return false;
     return undefined;

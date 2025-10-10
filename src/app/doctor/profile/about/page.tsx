@@ -19,7 +19,7 @@ import {
   UserX,
   MessageSquare,
 } from "lucide-react";
-import { Snackbar, Alert, Slide } from "@mui/material";
+import { Snackbar, Alert, Slide, SlideProps } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/UseUserStore";
 
@@ -33,7 +33,7 @@ import Kategoriyalar from "@/components/kategoriyalar";
 import Bemorlar from "@/components/bemorlar";
 import Xabarlashish from "@/components/xabarlashish";
 
-function SlideTransition(props: any) {
+function SlideTransition(props: SlideProps) {
   return <Slide {...props} direction="down" />;
 }
 
@@ -43,10 +43,26 @@ interface MenuItem {
   icon: JSX.Element;
 }
 
+type User = {
+  id: number;
+  name: string;
+  email: string;
+  role:string;
+  firstname: string;
+  lastname:string;
+  fullName: string;
+  profileImg?: string;
+  notifications: {
+    isFalseRead: number;
+  };
+  [key: string]: any;
+  
+};
+
 export default function ProfileLayout() {
   const [active, setActive] = useState("home");
   const [collapsed, setCollapsed] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User>({} as User);
   const [notifications, setNotifications] = useState(0);
   const [dropdown, setDropdown] = useState(false);
   const [openGreet, setOpenGreet] = useState(true);

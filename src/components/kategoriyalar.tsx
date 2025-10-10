@@ -11,7 +11,7 @@ import MuiAlert, { AlertProps } from "@mui/material/Alert"; // MUI Alert
 
 // --- MUI Alert Komponentasi ---
 // Snackbar ichida ishlatish uchun (forwardRef o'rniga oddiy funksiya bilan)
-const Alert = (props:any) => {
+const Alert = (props: AlertProps) => {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
 };
 
@@ -317,6 +317,19 @@ export default function Kategoriyalar() {
     severity: 'info',
   });
 
+
+  interface User{
+
+    id:string,
+    name:string,
+    description:string,
+    img:string
+    _count:{
+      doctors:number
+    },
+
+  } 
+
   const handleCloseSnackbar = (event?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
       return;
@@ -357,7 +370,7 @@ export default function Kategoriyalar() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const yangi: Kategoriya[] = res.data.map((el: any) => ({
+      const yangi: Kategoriya[] = res.data.map((el: User) => ({
         id: el.id,
         nom: el.name,
         tavsif: el.description || "",
