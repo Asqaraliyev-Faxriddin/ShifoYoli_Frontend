@@ -84,7 +84,7 @@ export default function LoginForm() {
         localStorage.setItem("accessToken", res.data.tokens.AccessToken);
         localStorage.setItem("refreshToken", res.data.tokens.RefreshToken);
 
-        setAlertMessage(res.data.message || "Kirish muvaffaqiyatli");
+        setAlertMessage("Kirish muvaffaqiyatli");
         setAlertSeverity("success");
         setAlertOpen(true);
 
