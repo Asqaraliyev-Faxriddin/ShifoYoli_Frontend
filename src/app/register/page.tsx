@@ -425,18 +425,17 @@
         else if (Number(form.day) < 1 || Number(form.day) > 31)
         errs.day = t.invalidDay;
     
-        // Oddiy qo‘shimcha checklar
         const dayNum = Number(form.day);
         const monthNum = Number(form.month);
-    
+        const arr : number[] = [4, 6, 9, 11]
+        
         if (dayNum > 29 && monthNum === 2) {
-        errs.day = "Fevralda bunday kun yo'q.";
-            
-         // @ts-expect-error: monthNum bu yerda number sifatida ishlatiladi
-        } else if (Number(dayNum) === 31 && [4, 6, 9, 11].includes(Number(monthNum))) {
-            errs.day = "Bu oyda 31 kun yo'q.";
-          }
-    
+          errs.day = "Fevralda bunday kun yo'q.";
+        //   @ts-ignore
+        } else if (dayNum === 31 && arr.includes(monthNum)) {
+          errs.day = "Bu oyda 31 kun yo'q.";
+        }
+        
         if (!form.password) errs.password = `${t.password} ${t.required}`;
         else if (form.password.length < 6) errs.password = t.passwordTooShort;
     
