@@ -184,7 +184,7 @@ export default function GooglePasswordForm() {
       setAlertSeverity("success");
       setAlertOpen(true);
 
-      setTimeout(() => router.replace("/profile"), 900);
+      setTimeout(() => router.replace("/doctor/profile/about"), 900);
     } catch (err) {
       const error = err as unknown as {
         response?: { data?: { message?: string } };

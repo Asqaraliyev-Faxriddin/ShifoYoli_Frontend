@@ -80,7 +80,12 @@ export default function Profile() {
           }
         );
 
-        if (response.data.succase) {
+        console.log(response.data);
+        
+
+        if (response.data) {
+          console.log("sdds",response.data);
+          
           setProfileData(response.data.data);
         } else {
           throw new Error(response.data.message || "Profil ma'lumotlarini yuklashda xato.");
@@ -96,7 +101,6 @@ export default function Profile() {
         setAlertMessage(errMessage);
         setAlertSeverity("error");
         setAlertOpen(true);
-        // Token muddati o'tgan bo'lsa, login sahifasiga yo'naltirish
         setTimeout(() => router.replace("/login"), 3000);
         
       } finally {
@@ -107,7 +111,6 @@ export default function Profile() {
     fetchProfile();
   }, [router]);
 
-  // Yuklanish holati
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-100 dark:bg-gray-900">
