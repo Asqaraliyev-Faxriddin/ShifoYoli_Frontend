@@ -431,10 +431,11 @@
     
         if (dayNum > 29 && monthNum === 2) {
         errs.day = "Fevralda bunday kun yo'q.";
-            // @ts-ignore
-    } else if (dayNum === 31 && [4, 6, 9, 11].includes(monthNum)) {
-        errs.day = "Bu oyda 31 kun yo'q.";
-        }
+            
+         // @ts-expect-error: monthNum bu yerda number sifatida ishlatiladi
+        } else if (Number(dayNum) === 31 && [4, 6, 9, 11].includes(Number(monthNum))) {
+            errs.day = "Bu oyda 31 kun yo'q.";
+          }
     
         if (!form.password) errs.password = `${t.password} ${t.required}`;
         else if (form.password.length < 6) errs.password = t.passwordTooShort;

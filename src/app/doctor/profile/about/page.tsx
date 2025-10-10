@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import {
   Home,
   Users,
@@ -47,17 +47,16 @@ type User = {
   id: number;
   name: string;
   email: string;
-  role:string;
-  firstname: string;
-  lastname:string;
+  role: string;
+  firstName: string;
+  lastName: string;
   fullName: string;
   profileImg?: string;
   notifications: {
     isFalseRead: number;
   };
-  [key: string]: any;
-  
-};
+} 
+
 
 export default function ProfileLayout() {
   const [active, setActive] = useState("home");
@@ -142,8 +141,14 @@ export default function ProfileLayout() {
         });
 
         if (!(res.status === 200 || res.status === 201)) router.push("/");
-      } catch (err: any) {
-        if (err.response?.status === 401) router.push("/");
+      } catch (error) {
+        const err = error as AxiosError;
+      
+        if (err.response?.status === 401) {
+          router.push("/login");
+        } else {
+          console.error("Profile fetch error:", err.message || err);
+        }
       }
     };
     checkProfile();
@@ -169,9 +174,14 @@ export default function ProfileLayout() {
         
         setUser(userData);
         setNotifications(data.data.notifications.isFalseRead || 0);
-      } catch (error: any) {
-        if (error.response?.status === 401) router.push("/");
-        console.log("Profile fetch error:", error);
+      }  catch (error) {
+        const err = error as AxiosError;
+      
+        if (err.response?.status === 401) {
+          router.push("/login");
+        } else {
+          console.error("Profile fetch error:", err.message || err);
+        }
       }
     }
 
