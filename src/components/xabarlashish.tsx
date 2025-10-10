@@ -123,8 +123,9 @@ function Xabarlashish() {
   const fetchRecipients = async (type: RecipientType) => {
     try {
       const token = localStorage.getItem("accessToken");
+      const endpoint = type === "bemors" ? "patients" : "doctors";
       const { data } = await axios.get<{ data: Recipient[] }>(
-        `https://faxriddin.bobur-dev.uz/admin/${type}?limit=50&page=1`,
+        `https://faxriddin.bobur-dev.uz/admin/${endpoint}?limit=50&page=1`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const formattedRecipients: Recipient[] = (data.data || []).map((r) => ({
