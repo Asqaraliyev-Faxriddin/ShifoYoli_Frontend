@@ -129,30 +129,6 @@ export default function ProfileLayout() {
 
   const menus = getMenusByRole(user?.role);
 
-  // ✅ Profilni tekshirish
-  useEffect(() => {
-    const checkProfile = async () => {
-      try {
-        const token = localStorage.getItem("accessToken");
-        if (!token) return router.push("/");
-
-        const res = await axios.get("https://faxriddin.bobur-dev.uz/profile/my/profile", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!(res.status === 200 || res.status === 201)) router.push("/");
-      } catch (error) {
-        const err = error as AxiosError;
-      
-        if (err.response?.status === 401) {
-          router.push("/login");
-        } else {
-          console.error("Profile fetch error:", err.message || err);
-        }
-      }
-    };
-    checkProfile();
-  }, [router]);
 
   // ✅ Foydalanuvchi ma'lumotlarini olish
   useEffect(() => {
@@ -408,7 +384,7 @@ export default function ProfileLayout() {
               >
                 <img
                   src={
-                    user?.profileImg ? `https://faxriddin.bobur-dev.uz/profiles/url/${user.profileImg}`: "/img/user.png"
+                    user?.profileImg ? `${user.profileImg}`: "/img/user.png"
                   }
                   alt="user"
                   className="w-10 h-10 rounded-full object-cover border-2 border-orange-500"
