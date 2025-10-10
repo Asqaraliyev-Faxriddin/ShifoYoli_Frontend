@@ -364,8 +364,7 @@ export default function ProfileLayout() {
                  isDark ? "text-white" : "text-gray-800"
                }`}
              >
-       {user?.role? user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase(): "Bemor"
-} Panel
+       { user?.role? user.role.charAt(0).toUpperCase() + user.role.slice(1).toLowerCase():""} Panel
 
              </div>
           </div>

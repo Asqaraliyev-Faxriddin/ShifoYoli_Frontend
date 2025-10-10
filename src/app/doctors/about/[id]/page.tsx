@@ -1,38 +1,31 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import {  useParams } from "next/navigation";
-import {  useRouter } from "next/navigation";
-
+import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import {
   Box,
   Typography,
-  Card,
-  CardMedia,
   CircularProgress,
   Button,
-  Grid,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useUserStore } from "@/store/UseUserStore";
 import Header from "@/pages/Header";
 import Footer from "@/pages/Footer";
 
-// Yangi qo'shilgan interfeys: Shifokorning harajatlar tuzilmasi
 interface DoctorSalary {
-  id: string;
-  doctorId: string;
-  free: boolean;
-  daily: string;
-  weekly: string;
-  monthly: string; // Oylik narx (string sifatida keladi)
-  yearly: string;
-  createdAt: string;
-  updatedAt: string;
+  id?: string;
+  doctorId?: string;
+  free?: boolean;
+  daily?: string;
+  weekly?: string;
+  monthly?: string;
+  yearly?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-// Yangilangan DoctorProfile interfeysi
 interface DoctorProfile {
   bio: string;
   images: string[];
@@ -40,8 +33,7 @@ interface DoctorProfile {
   files?: string[];
   category: { name: string; img?: string };
   futures?: string[];
-  // API tuzilmasiga moslab o'zgartirildi: salary endi DoctorSalary massivida
-  salary?: DoctorSalary[]; 
+  salary?: DoctorSalary[];
 }
 
 interface Doctor {
@@ -53,26 +45,13 @@ interface Doctor {
   doctorProfile?: DoctorProfile;
 }
 
-const BASE_URL = "https://faxriddin.bobur-dev.uz"; // Backendning asosiy manzili
+const BASE_URL = "https://faxriddin.bobur-dev.uz";
 
-// Narxni formatlash funksiyasi
-const formatPrice = (priceString: string | null | undefined): string => {
-  if (!priceString) return "Ko'rsatilmagan";
-  
-  try {
-    const price = parseInt(priceString, 10);
-    if (isNaN(price)) return "Ko'rsatilmagan";
-
-    // O'zbek so'mi formatida chiroyli qilib formatlash
-    return new Intl.NumberFormat('uz-UZ', { 
-      style:'decimal', 
-      currency: 'UZS', 
-      maximumFractionDigits: 0 
-    }).format(price).replace('UZS', "so'm").trim();
-
-  } catch (e) {
-    return "Xato format";
-  }
+const formatPrice = (priceString?: string) => {
+  if (!priceString) return "Ko‘rsatilmagan";
+  const num = parseInt(priceString);
+  if (isNaN(num)) return "Ko‘rsatilmagan";
+  return new Intl.NumberFormat("uz-UZ").format(num);
 };
 
 const DoctorDetailPage: React.FC = () => {
@@ -80,49 +59,27 @@ const DoctorDetailPage: React.FC = () => {
   const router = useRouter();
   const params = useParams();
   const doctorId = params?.id;
-
   const [doctor, setDoctor] = useState<Doctor | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!doctorId) {
-      router.push("/doctors");
-      return;
-    }
-
+    if (!doctorId) return router.push("/doctors");
     setLoading(true);
-
-    // API chaqiruvi (Real ma'lumot API javobiga o'ralgan)
-    // Eslatma: Siz yuborgan ma'lumot `data` massivi ichida kelgani uchun, agar API aynan shunday qaytarsa, uni to'g'irlash kerak.
-    // Men to'g'ridan-to'g'ri shifokor obyektini kutib yozdim, chunki oldingi API shunday edi.
     axios
       .get(`${BASE_URL}/User/doctorOne/${doctorId}`)
-      .then((res) => {
-        // API tuzilmasi siz yuborgan JSONga o'xshasa, quyidagini ishlatish kerak bo'lishi mumkin:
-        // const doctorData = res.data?.data?.[0]; 
-        
-        // Agar API faqatgina bitta shifokor obyektini qaytarsa (oldingidek):
-        const doctorData = res.data.data;
-
-        if (!doctorData) {
-          router.push("/");
-          return;
-        }
-        
-        setDoctor(doctorData);
-      })
+      .then((res) => setDoctor(res.data.data))
       .catch((err) => {
-        console.error("Shifokor ma'lumotlarini yuklashda xato:", err);
+        console.error("Xato:", err);
         router.push("/");
       })
       .finally(() => setLoading(false));
-  }, [doctorId, router]);
+  }, [doctorId]);
 
-  if (loading) {
+  if (loading)
     return (
       <Box
         sx={{
-          minHeight: "50vh",
+          minHeight: "60vh",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
@@ -132,90 +89,77 @@ const DoctorDetailPage: React.FC = () => {
         <CircularProgress />
       </Box>
     );
-  }
 
-  if (!doctor) {
-    return null;
-  }
+  if (!doctor) return null;
 
+  const profile = doctor.doctorProfile;
   const fullName = `${doctor.firstName} ${doctor.lastName}`;
-  const bio = doctor.doctorProfile?.bio || "Ma'lumot mavjud emas";
-  const category = doctor.doctorProfile?.category?.name || "Shifokor";
-  const profileImgUrl = doctor.profileImg || "https://via.placeholder.com/400x400";
-
-  
-  const doctorImages = doctor.doctorProfile?.images?.map(imagePath => `${BASE_URL}/${imagePath}`) || [];
-  const futures = doctor.doctorProfile?.futures || [];
-  const videos = doctor.doctorProfile?.videos || [];
-  const files = doctor.doctorProfile?.files || [];
-  
-  const salaryData = doctor.doctorProfile?.salary?.[0]; 
-  const monthlySalary = formatPrice(salaryData?.monthly);
-  const dailySalary = formatPrice(salaryData?.daily);
+  const category = profile?.category?.name || "Shifokor";
+  const images = profile?.images?.map((p) => `${BASE_URL}/${p}`) || [];
+  const videos = profile?.videos?.map((p) => `${BASE_URL}/${p}`) || [];
+  const futures = profile?.futures || [];
+  const salary = profile?.salary?.[0];
 
   return (
     <Box sx={{ bgcolor: isDark ? "#0b1321" : "#fff", color: isDark ? "#fff" : "#000" }}>
       <Header />
 
-      {/* --- Orqaga tugma --- */}
-      <Box sx={{ px: 4, py: 3, maxWidth: 1200, mx: "auto" }}>
+      {/* Orqaga tugma */}
+      <Box sx={{ px: 4, pt: 18, maxWidth: 1200, mx: "auto" }}>
         <Button
           startIcon={<ArrowBackIcon />}
           onClick={() => router.back()}
           sx={{
-            color: isDark ? "#60a5fa" : "#3b82f6",
-            fontWeight: "bold",
+            color: isDark ? "#60a5fa" : "#2563eb",
+            fontWeight: 600,
+            mb: 4,
           }}
         >
           Orqaga
         </Button>
       </Box>
-      <hr />
 
-      {/* --- Asosiy kontent: Rasm va Ma'lumotlar --- */}
+      {/* Asosiy kontent */}
       <Box
         sx={{
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
+          gap: 5,
           maxWidth: 1200,
           mx: "auto",
-          gap: 6,
           px: 4,
-          py: 3,
+          pb: 6,
         }}
       >
-        {/* Rasm (Chap qism) */}
-        <Box sx={{ flex: 2, minWidth: { md: 350 } }}>
-          <Card
-            sx={{
-              borderRadius: 3,
-              overflow: "hidden",
-              boxShadow: isDark
-                ? "0 10px 30px rgba(0,0,0,0.7)"
-                : "0 6px 18px rgba(0,0,0,0.2)",
-              transition: "0.3s",
+        {/* Chap tomonda rasm */}
+        <div
+          style={{
+            flex: 1.3,
+            borderRadius: "16px",
+            overflow: "hidden",
+            boxShadow: isDark
+              ? "0 10px 30px rgba(0,0,0,0.6)"
+              : "0 6px 18px rgba(0,0,0,0.15)",
+          }}
+        >
+          <img
+            src={doctor.profileImg || "https://via.placeholder.com/400x400"}
+            alt={fullName}
+            style={{
+              width: "100%",
+              height: "420px",
+              objectFit: "cover",
+              display: "block",
             }}
-          >
-            <CardMedia
-              component="img"
-              src={profileImgUrl}
-              alt={fullName}
-              sx={{
-                width: "100%",
-                height: { xs: 300, md: 450 },
-                objectFit: "cover",
-              }}
-            />
-          </Card>
-        </Box>
+          />
+        </div>
 
-        {/* Ma'lumotlar (O'ng qism) */}
+        {/* O‘ng tomonda ma’lumotlar */}
         <Box sx={{ flex: 1 }}>
           <Typography
             variant="h4"
             fontWeight="bold"
-            gutterBottom
-            sx={{ color: isDark ? "#60a5fa" : "primary.main" }}
+            sx={{ color: isDark ? "#60a5fa" : "#1d4ed8", mb: 1 }}
           >
             {fullName}
           </Typography>
@@ -223,163 +167,173 @@ const DoctorDetailPage: React.FC = () => {
           <Typography
             variant="subtitle1"
             sx={{
-              mb: 2,
-              px: 2,
-              py: 1,
               display: "inline-block",
-              borderRadius: "12px",
-              fontWeight: 500,
-              color: isDark ? "#ccc" : "#555",
-              backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
+              px: 2,
+              py: 0.5,
+              borderRadius: "10px",
+              bgcolor: isDark ? "rgba(255,255,255,0.08)" : "#f3f4f6",
+              color: isDark ? "#d1d5db" : "#374151",
+              mb: 2,
             }}
           >
             {category}
           </Typography>
 
-          <Typography variant="body1" sx={{ mt: 2, lineHeight: 1.6 }}>
-            {bio}
+          <Typography variant="body1" sx={{ lineHeight: 1.7, mb: 3 }}>
+            {profile?.bio || "Ma’lumot mavjud emas"}
           </Typography>
-          
-          <Box sx={{ mt: 4 }}>
-            <Typography variant="body2" color={isDark ? "#ccc" : "textSecondary"} sx={{ mb: 1 }}>
-              Email: {doctor.email}
-            </Typography>
-            {/* Kunlik va Oylik narxlarni ko'rsatish */}
-            <Typography variant="body2" color={isDark ? "#ccc" : "textSecondary"} sx={{ mb: 1 }}>
-              Kunlik Narx: {`${dailySalary} so'm`}
-            </Typography>
-            <Typography variant="body2" color={isDark ? "#ccc" : "textSecondary"}>
-              Oylik Narx : {` ${monthlySalary} so'm`}
-            </Typography>
-          </Box>
+
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            <strong>Email:</strong> {doctor.email}
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 1 }}>
+            <strong>Kunlik narx:</strong> {formatPrice(salary?.daily)} so‘m
+          </Typography>
+          <Typography variant="body2">
+            <strong>Oylik narx:</strong> {formatPrice(salary?.monthly)} so‘m
+          </Typography>
         </Box>
       </Box>
-      
-      <hr />
 
-      {/* --- Qo'shimcha Ma'lumotlar Bo'limi --- */}
+      {/* Qo‘shimcha ma’lumotlar */}
       <Box sx={{ maxWidth: 1200, mx: "auto", px: 4, py: 6 }}>
-      
-        {/* Sertifikatlar va Kurslar */}
         {futures.length > 0 && (
-          <Box sx={{ mt: 4 }}>
+          <Box sx={{ mb: 5 }}>
             <Typography
               variant="h5"
               fontWeight="bold"
-              gutterBottom
-              sx={{ color: isDark ? "#60a5fa" : "primary.main" }}
+              sx={{ color: isDark ? "#60a5fa" : "#1d4ed8", mb: 2 }}
             >
-              Qo'shimcha malumotlar
+              Qo‘shimcha ma’lumotlar
             </Typography>
-            <Box component="ul" sx={{ pl: 2, listStyleType: "disc" }}>
+            <ul style={{ paddingLeft: "20px", margin: 0 }}>
               {futures.map((f, i) => (
-                <li key={i} className="list-none">
-                  <Typography variant="body1" sx={{ py: 0.5 }}>{f}</Typography>
+                <li key={i}>
+                  <Typography variant="body1" sx={{ py: 0.5 }}>
+                    {f}
+                  </Typography>
                 </li>
               ))}
-            </Box>
+            </ul>
           </Box>
         )}
-        
-        {/* Doktor Rasmlari (Galereya) */}
-        {doctorImages.length > 0 && (
-          <Box sx={{ mt: 6 }}>
-          
-            <Grid container spacing={3}>
-             {/* Rasmlar */}
-{doctorImages.length > 0 && (
-  <Box sx={{ mt: 6 }}>
+
+        {/* Rasmlar */}
+        {images.length > 0 && (
+  <Box sx={{ mb: 5 }}>
     <Typography
       variant="h5"
       fontWeight="bold"
-      gutterBottom
-      sx={{ color: isDark ? "#60a5fa" : "primary.main" }}
+      sx={{ color: isDark ? "#60a5fa" : "#1d4ed8", mb: 2 }}
     >
-      Doktor Rasmlari (Galereya)
+      Doktor Rasmlari
     </Typography>
 
-    <Box
-      sx={{
+    <div
+      style={{
         display: "grid",
-        gridTemplateColumns: {
-          xs: "1fr",
-          sm: "repeat(2, 1fr)",
-          md: "repeat(3, 1fr)",
-        },
-        gap: 3,
+        gridTemplateColumns: "repeat(auto-fit, minmax(60px, 1fr))",
+        gap: "20px",
       }}
     >
-      {doctorImages.map((imageUrl, i) => (
-        <Box
+      {images.map((url, i) => (
+        <div
           key={i}
-          sx={{
-            borderRadius: 2,
+          style={{
+            borderRadius: "12px",
             overflow: "hidden",
+            width: "50%",
+
             boxShadow: isDark
-              ? "0 4px 12px rgba(0,0,0,0.5)"
+              ? "0 4px 12px rgba(0,0,0,0.4)"
               : "0 2px 8px rgba(0,0,0,0.1)",
-            transition: "0.3s",
-            "&:hover": { transform: "scale(1.03)" },
+            transition: "transform 0.3s ease",
           }}
         >
-          <CardMedia
-            component="img"
-            src={imageUrl}
-            alt={`Doktor rasmi ${i + 1}`}
-            sx={{
+          <img
+            src={url}
+            alt={`rasm-${i}`}
+            style={{
               width: "100%",
-              height: 250,
+              height: "280px", // 🔹 avval 250 edi
               objectFit: "cover",
+              display: "block",
             }}
           />
-        </Box>
+        </div>
       ))}
-    </Box>
+    </div>
   </Box>
 )}
 
-            </Grid>
-          </Box>
-        )}
-        
-        {/* Videolar Bo'limi (Agar bo'lsa) */}
-        {videos.length > 0 && (
-          <Box sx={{ mt: 6 }}>
-            <Typography
-              variant="h5"
-              fontWeight="bold"
-              gutterBottom
-              sx={{ color: isDark ? "#60a5fa" : "primary.main" }}
-            >
-              Videolar
-            </Typography>
-            <Typography variant="body1">
-                Videolar mavjud: {videos.length} ta
-            </Typography>
-          </Box>
-        )}
-        
-        {/* Fayllar Bo'limi (Agar bo'lsa) */}
-        {files.length > 0 && (
-          <Box sx={{ mt: 6 }}>
-            <Typography
-              variant="h5"
-              fontWeight="bold"
-              gutterBottom
-              sx={{ color: isDark ? "#60a5fa" : "primary.main" }}
-            >
-              Fayllar (Yuklab olish uchun)
-            </Typography>
-            <Typography variant="body1">
-                Fayllar mavjud: {files.length} ta
-            </Typography>
-          </Box>
-        )}
+{/* 🔸 Videolar */}
+{videos.length > 0 && (
+  <Box sx={{ mb: 5 }}>
+    <Typography
+      variant="h5"
+      fontWeight="bold"
+      sx={{ color: isDark ? "#60a5fa" : "#1d4ed8", mb: 2 }}
+    >
+      Videolar
+    </Typography>
+
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+        gap: "20px",
+      }}
+    >
+      {videos.map((v, i) => (
+        <div
+          key={i}
+          style={{
+            borderRadius: "12px",
+            overflow: "hidden",
+            width: "50%",
+
+            boxShadow: isDark
+              ? "0 4px 12px rgba(0,0,0,0.4)"
+              : "0 2px 8px rgba(0,0,0,0.1)",
+            transition: "transform 0.3s ease",
+          }}
+        >
+          <video
+            controls
+            style={{
+              width: "100%",
+              height: "280px", // 🔹 rasmlar bilan bir xil
+              objectFit: "cover",
+              borderRadius: "8px",
+              background: "#000",
+            }}
+          >
+            <source src={v} type="video/mp4" />
+            Brauzer videoni qo‘llamaydi.
+          </video>
+        </div>
+      ))}
+    </div>
+  </Box>
+)}
 
 
-
-        <button className="bg-blue-600 text-[18px] mt-[40px] text-white rounded-[15px] hover:cursor-pointer py-[8px] pl-[8px] pr-[8px] px-[8px]" onClick={()=> router.push("http://localhost:3000/doctor/profile/about") }>Shifokor bilan suhbatlashish</button>
-
+        <Button
+          variant="contained"
+          size="large"
+          sx={{
+            bgcolor: "#2563eb",
+            borderRadius: "12px",
+            px: 4,
+            py: 1.5,
+            fontSize: "16px",
+            fontWeight: 600,
+            "&:hover": { bgcolor: "#1d4ed8" },
+          }}
+          onClick={() => router.push("/doctor/profile/about")}
+        >
+          Shifokor bilan suhbatlashish
+        </Button>
       </Box>
 
       <Footer />
