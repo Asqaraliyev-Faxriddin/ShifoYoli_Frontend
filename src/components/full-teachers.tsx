@@ -99,11 +99,13 @@ const FullTeachers: React.FC = () => {
       const fullName = `${doctor.firstName} ${doctor.lastName}`;
       const bio = doctor.doctorProfile?.bio || "Ma'lumot mavjud emas";
       const category = doctor.doctorProfile?.category?.name || "Shifokor";
+      
       const img = doctor.profileImg
         ? doctor.profileImg
-        : doctor.doctorProfile?.images?.[0]
-        ? `https://faxriddin.bobur-dev.uz/${doctor.doctorProfile.images[0]}`
-        : "https://via.placeholder.com/400x400";
+        : "./img/user.png";
+
+        console.log(img);
+        
   
       return (
         <Box key={doctor.id} sx={{ width: "100%", maxWidth: 400, mx: "auto" }}>
@@ -126,7 +128,7 @@ const FullTeachers: React.FC = () => {
         >
           <CardMedia
             component="img"
-            image={img}
+            image={img }
             alt={fullName}
             sx={{
               width: "100%",
