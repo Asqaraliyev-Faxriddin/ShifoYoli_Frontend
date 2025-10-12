@@ -73,9 +73,18 @@ interface Doctor {
     salary: { monthly: string }[];
   };
 }
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: {
+    value: number;
+  }[];
+  label?: string;
+  isDark: boolean;
+}
+
 
 // Tooltip (oylik daromad uchun)
-const CustomTooltip = ({ active, payload, label, isDark }: any) => {
+const CustomTooltip = ({ active, payload, label, isDark }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <Box
