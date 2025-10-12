@@ -206,6 +206,14 @@ const Tolovlar: React.FC = () => {
     }
   };
 
+  interface RoleMap {
+    Adminlar: "ADMIN";
+    Shifokorlar: "DOCTOR";
+    Bemorlar: "BEMOR";
+  }
+  
+
+
   // Umumiy (mass) to‘lov yoki ayirish
   const handleMassAction = async () => {
     if (!selectedRole || !amountInput || !title || !message) {
@@ -218,7 +226,7 @@ const Tolovlar: React.FC = () => {
     }
     try {
       const token = localStorage.getItem("accessToken");
-      const roleMap: any = {
+      const roleMap: RoleMap = {
         Adminlar: "ADMIN",
         Shifokorlar: "DOCTOR",
         Bemorlar: "BEMOR",
