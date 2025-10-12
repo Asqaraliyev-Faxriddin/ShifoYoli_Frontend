@@ -215,12 +215,7 @@ const Tolovlar: React.FC = () => {
 
 
   // Umumiy (mass) to‘lov yoki ayirish
-  interface RoleMap {
-    Adminlar: "ADMIN";
-    Shifokorlar: "DOCTOR";
-    Bemorlar: "BEMOR";
-  }
-  
+
   type RoleKey = keyof RoleMap; // "Adminlar" | "Shifokorlar" | "Bemorlar"
   
 
