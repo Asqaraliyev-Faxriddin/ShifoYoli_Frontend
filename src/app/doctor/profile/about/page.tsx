@@ -92,6 +92,7 @@ export default function ProfileLayout() {
       return [
         baseMenus.home,
         baseMenus.bemorlar,
+        baseMenus.tolovlar,
         baseMenus.izohlar,
         baseMenus.kategoriyalar,
         baseMenus.xabarlashish,
@@ -106,6 +107,7 @@ export default function ProfileLayout() {
         baseMenus.home,
       baseMenus.kategoriyalar,
         baseMenus.shifokorlar,
+        baseMenus.tolovlar,
         baseMenus.izohlar,
         baseMenus.xabarlashish,
         baseMenus.sozlamalar,
