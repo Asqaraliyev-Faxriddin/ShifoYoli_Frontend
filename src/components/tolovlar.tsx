@@ -206,12 +206,6 @@ const Tolovlar: React.FC = () => {
     }
   };
 
-  interface RoleMap {
-    Adminlar: "ADMIN";
-    Shifokorlar: "DOCTOR";
-    Bemorlar: "BEMOR";
-  }
-  
 
 
   // Umumiy (mass) to‘lov yoki ayirish
@@ -226,7 +220,7 @@ const Tolovlar: React.FC = () => {
     }
     try {
       const token = localStorage.getItem("accessToken");
-      const roleMap: RoleMap = {
+      const roleMap: Record<string, string> = {
         Adminlar: "ADMIN",
         Shifokorlar: "DOCTOR",
         Bemorlar: "BEMOR",
