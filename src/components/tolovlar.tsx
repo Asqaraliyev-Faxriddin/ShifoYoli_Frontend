@@ -206,9 +206,25 @@ const Tolovlar: React.FC = () => {
     }
   };
 
+  interface RoleMap {
+    Adminlar: "ADMIN";
+    Shifokorlar: "DOCTOR";
+    Bemorlar: "BEMOR";
+  }
+  
 
 
   // Umumiy (mass) to‘lov yoki ayirish
+  interface RoleMap {
+    Adminlar: "ADMIN";
+    Shifokorlar: "DOCTOR";
+    Bemorlar: "BEMOR";
+  }
+  
+  type RoleKey = keyof RoleMap; // "Adminlar" | "Shifokorlar" | "Bemorlar"
+  
+
+  
   const handleMassAction = async () => {
     if (!selectedRole || !amountInput || !title || !message) {
       setSnackbar({
@@ -218,25 +234,30 @@ const Tolovlar: React.FC = () => {
       });
       return;
     }
+  
     try {
       const token = localStorage.getItem("accessToken");
-      const roleMap: Record<string, string> = {
+      const roleMap: RoleMap = {
         Adminlar: "ADMIN",
         Shifokorlar: "DOCTOR",
         Bemorlar: "BEMOR",
       };
+  
       const url = `https://faxriddin.bobur-dev.uz/admin/wallet/mass/${
         actionType === "massAdd" ? "add" : "deduct"
       }`;
+  
       const amount =
         actionType === "massDeduct"
           ? -Math.abs(Number(amountInput))
           : Math.abs(Number(amountInput));
+  
       await axios.post(
         url,
-        { role: roleMap[selectedRole], amount, title, message },
+        { role: roleMap[selectedRole as RoleKey], amount, title, message },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+  
       setSnackbar({
         open: true,
         message: "✅ Umumiy amal bajarildi!",
@@ -255,7 +276,7 @@ const Tolovlar: React.FC = () => {
       });
     }
   };
-
+  
   const renderAmount = (p: Payment) => {
     const isDebit = p.type === "DEBIT";
     const color = isDebit ? "error.main" : "success.main";
