@@ -26,13 +26,11 @@ import {
   MenuItem,
   Select,
   useMediaQuery,
-  Card,
-  CardContent,
-  Divider,
   Snackbar,
   Alert,
+  Pagination,
 } from "@mui/material";
-import { Add, Remove, Search } from "@mui/icons-material";
+import { Add, Remove, Search, Groups } from "@mui/icons-material";
 
 interface User {
   id: string;
@@ -52,10 +50,10 @@ interface Wallet {
 interface Payment {
   id: string;
   amount: string;
-  type: string;
+  type: "CREDIT" | "DEBIT";
+  source: string;
   createdAt: string;
   wallet?: Wallet;
-  source: string;
 }
 
 interface PaymentsResponse {
@@ -73,26 +71,26 @@ const Tolovlar: React.FC = () => {
   const [search, setSearch] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [actionType, setActionType] = useState<"add" | "deduct">("add");
+  const [actionType, setActionType] = useState<
+    "add" | "deduct" | "massAdd" | "massDeduct"
+  >("add");
   const [openDialog, setOpenDialog] = useState(false);
   const [step, setStep] = useState<1 | 2>(1);
   const [selectedRole, setSelectedRole] = useState("");
   const [selectedUserId, setSelectedUserId] = useState("");
   const [amountInput, setAmountInput] = useState("");
   const [usersList, setUsersList] = useState<User[]>([]);
+  const [message, setMessage] = useState("");
+  const [title, setTitle] = useState("");
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success" as "success" | "error" | "info",
   });
-  const isMobile = useMediaQuery("(max-width:768px)");
+
   const limit = 10;
   const totalPages = Math.ceil(total / limit);
-
-  const uzMonths = [
-    "Yan", "Fev", "Mart", "Apr", "May", "Iyun",
-    "Iyul", "Avg", "Sen", "Okt", "Noy", "Dek"
-  ];
+  const uzMonths = ["Yan", "Fev", "Mart", "Apr", "May", "Iyun", "Iyul", "Avg", "Sen", "Okt", "Noy", "Dek"];
 
   // Profilni olish
   useEffect(() => {
@@ -118,15 +116,14 @@ const Tolovlar: React.FC = () => {
       setLoading(true);
       try {
         const token = localStorage.getItem("accessToken");
+        const offset = (page - 1) * limit;
         let url =
           user.role === "SUPERADMIN"
-            ? `https://faxriddin.bobur-dev.uz/payment/search?limit=${limit}&offset=${page}`
-            : `https://faxriddin.bobur-dev.uz/payment/Payment/user?limit=${limit}&offset=${page}`;
-
+            ? `https://faxriddin.bobur-dev.uz/payment/search?limit=${limit}&offset=${offset}`
+            : `https://faxriddin.bobur-dev.uz/payment/Payment/user?limit=${limit}&offset=${offset}`;
         if (search) url += `&firstName=${search}&email=${search}`;
         if (startDate) url += `&startDate=${startDate}`;
         if (endDate) url += `&endDate=${endDate}`;
-
         const { data } = await axios.get<PaymentsResponse>(url, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -141,7 +138,7 @@ const Tolovlar: React.FC = () => {
     fetchPayments();
   }, [user, page, search, startDate, endDate]);
 
-  // Kimga to‘lov qilinadi
+  // Kimga to‘lov qilinadi (individual)
   const handleRoleSelect = async () => {
     if (!selectedRole) return;
     try {
@@ -159,21 +156,21 @@ const Tolovlar: React.FC = () => {
       });
       setUsersList(data.data);
       setStep(2);
-    } catch (err) {
+    } catch {
       setSnackbar({
         open: true,
-        message: "Foydalanuvchilarni olishda xatolik",
+        message: "Foydalanuvchilarni olishda xatolik!",
         severity: "error",
       });
     }
   };
 
-  // Qo‘shish yoki ayirish
+  // To‘lov yoki ayirish (individual)
   const handleWalletAction = async () => {
     if (!selectedUserId || !amountInput) {
       setSnackbar({
         open: true,
-        message: "Ma'lumotlarni to‘ldiring!",
+        message: "Iltimos, barcha maydonlarni to‘ldiring!",
         severity: "error",
       });
       return;
@@ -181,9 +178,13 @@ const Tolovlar: React.FC = () => {
     try {
       const token = localStorage.getItem("accessToken");
       const url = `https://faxriddin.bobur-dev.uz/admin/wallet/${actionType}`;
+      const amount =
+        actionType === "deduct"
+          ? -Math.abs(Number(amountInput))
+          : Math.abs(Number(amountInput));
       await axios.post(
         url,
-        { userId: selectedUserId, amount: Number(amountInput) },
+        { userId: selectedUserId, amount },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setSnackbar({
@@ -196,7 +197,7 @@ const Tolovlar: React.FC = () => {
       setAmountInput("");
       setSelectedUserId("");
       setSelectedRole("");
-    } catch (err) {
+    } catch {
       setSnackbar({
         open: true,
         message: "❌ Xatolik yuz berdi!",
@@ -205,18 +206,80 @@ const Tolovlar: React.FC = () => {
     }
   };
 
+  // Umumiy (mass) to‘lov yoki ayirish
+  const handleMassAction = async () => {
+    if (!selectedRole || !amountInput || !title || !message) {
+      setSnackbar({
+        open: true,
+        message: "Iltimos, barcha maydonlarni to‘ldiring!",
+        severity: "error",
+      });
+      return;
+    }
+    try {
+      const token = localStorage.getItem("accessToken");
+      const roleMap: any = {
+        Adminlar: "ADMIN",
+        Shifokorlar: "DOCTOR",
+        Bemorlar: "BEMOR",
+      };
+      const url = `https://faxriddin.bobur-dev.uz/admin/wallet/mass/${
+        actionType === "massAdd" ? "add" : "deduct"
+      }`;
+      const amount =
+        actionType === "massDeduct"
+          ? -Math.abs(Number(amountInput))
+          : Math.abs(Number(amountInput));
+      await axios.post(
+        url,
+        { role: roleMap[selectedRole], amount, title, message },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setSnackbar({
+        open: true,
+        message: "✅ Umumiy amal bajarildi!",
+        severity: "success",
+      });
+      setOpenDialog(false);
+      setAmountInput("");
+      setMessage("");
+      setTitle("");
+      setSelectedRole("");
+    } catch {
+      setSnackbar({
+        open: true,
+        message: "❌ Xatolik yuz berdi!",
+        severity: "error",
+      });
+    }
+  };
+
+  const renderAmount = (p: Payment) => {
+    const isDebit = p.type === "DEBIT";
+    const color = isDebit ? "error.main" : "success.main";
+    const sign = isDebit ? "-" : "+";
+    return (
+      <Typography sx={{ color, fontWeight: 600 }}>
+        {sign} {Number(p.amount).toLocaleString("uz-UZ")} so‘m
+      </Typography>
+    );
+  };
+
+  const formatDate = (date: string) => {
+    const d = new Date(date);
+    return `${d.getDate()} ${uzMonths[d.getMonth()]} ${d.getFullYear()} ${d.getHours()}:${String(
+      d.getMinutes()
+    ).padStart(2, "0")}`;
+  };
+
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold" }}>
         💳 To‘lovlar
       </Typography>
 
-      {/* 🔍 Qidiruv va Sana filterlari */}
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        spacing={2}
-        sx={{ mb: 3 }}
-      >
+      {/* 🔍 Qidiruv va filterlar */}
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mb: 3 }}>
         <TextField
           placeholder="Ism yoki email orqali qidirish..."
           value={search}
@@ -225,10 +288,7 @@ const Tolovlar: React.FC = () => {
           InputProps={{
             startAdornment: <Search sx={{ mr: 1, color: "gray" }} />,
           }}
-          sx={{
-            backgroundColor: "#fafafa",
-            borderRadius: 3,
-          }}
+          sx={{ backgroundColor: "#fafafa", borderRadius: 3 }}
         />
         <TextField
           type="date"
@@ -248,19 +308,13 @@ const Tolovlar: React.FC = () => {
         />
       </Stack>
 
-      {/* Tugmalar */}
+      {/* To‘lov qilish, ayirish va umumiy tugmalar */}
       {(user?.role === "SUPERADMIN" || user?.role === "ADMIN") && (
-        <Stack direction="row" spacing={2} sx={{ mb: 4 }}>
+        <Stack direction="row" spacing={2} sx={{ mb: 4, flexWrap: "wrap" }}>
           <Button
             startIcon={<Add />}
             variant="contained"
-            sx={{
-              backgroundColor: "#00bcd4",
-              borderRadius: 3,
-              px: 3,
-              transition: "0.3s",
-              "&:hover": { backgroundColor: "#0097a7" },
-            }}
+            sx={{ backgroundColor: "#00bcd4", borderRadius: 3 }}
             onClick={() => {
               setActionType("add");
               setOpenDialog(true);
@@ -272,13 +326,7 @@ const Tolovlar: React.FC = () => {
           <Button
             startIcon={<Remove />}
             variant="contained"
-            sx={{
-              backgroundColor: "#f44336",
-              borderRadius: 3,
-              px: 3,
-              transition: "0.3s",
-              "&:hover": { backgroundColor: "#c62828" },
-            }}
+            sx={{ backgroundColor: "#f44336", borderRadius: 3 }}
             onClick={() => {
               setActionType("deduct");
               setOpenDialog(true);
@@ -287,10 +335,35 @@ const Tolovlar: React.FC = () => {
           >
             To‘lov ayirish
           </Button>
+          <Button
+            startIcon={<Groups />}
+            variant="outlined"
+            sx={{ borderRadius: 3 }}
+            onClick={() => {
+              setActionType("massAdd");
+              setOpenDialog(true);
+              setStep(1);
+            }}
+          >
+            Umumiy to‘lov qilish
+          </Button>
+          <Button
+            startIcon={<Groups />}
+            variant="outlined"
+            color="error"
+            sx={{ borderRadius: 3 }}
+            onClick={() => {
+              setActionType("massDeduct");
+              setOpenDialog(true);
+              setStep(1);
+            }}
+          >
+            Umumiy to‘lov ayirish
+          </Button>
         </Stack>
       )}
 
-      {/* Jadval yoki Kartalar */}
+      {/* Jadval */}
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
           <CircularProgress />
@@ -299,57 +372,25 @@ const Tolovlar: React.FC = () => {
         <Typography align="center" sx={{ mt: 4 }}>
           To‘lovlar topilmadi.
         </Typography>
-      ) : isMobile ? (
-        <Stack spacing={2}>
-          {payments.map((p, i) => (
-            <Card key={p.id} sx={{ p: 2, borderRadius: 3, boxShadow: 3 }}>
-              <CardContent>
-                <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-                  #{i + 1}
-                </Typography>
-                <Divider sx={{ my: 1 }} />
-                <Typography>
-                  <strong>Miqdori:</strong>{" "}
-                  {Number(p.amount).toLocaleString("uz-UZ")} so‘m
-                </Typography>
-                <Typography>
-                  <strong>Holati:</strong> Paid
-                </Typography>
-                <Typography>
-                  <strong>To‘lov turi:</strong> {p.source || "Naqd"}
-                </Typography>
-                <Typography>
-                  <strong>Vaqti:</strong>{" "}
-                  {(() => {
-                    const d = new Date(p.createdAt);
-                    return `${d.getDate()} ${
-                      uzMonths[d.getMonth()]
-                    }, ${d.getFullYear()} ${d.getHours()}:${String(
-                      d.getMinutes()
-                    ).padStart(2, "0")}`;
-                  })()}
-                </Typography>
-              </CardContent>
-            </Card>
-          ))}
-        </Stack>
       ) : (
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
               <TableRow>
                 <TableCell>#</TableCell>
-                {user?.role === "SUPERADMIN" && <TableCell>Foydalanuvchi</TableCell>}
+                {user?.role === "SUPERADMIN" && (
+                  <TableCell>Foydalanuvchi</TableCell>
+                )}
                 <TableCell>Miqdori</TableCell>
-                <TableCell>Holati</TableCell>
-                <TableCell>To‘lov turi</TableCell>
+                <TableCell>Tipi</TableCell>
+                <TableCell>Manba</TableCell>
                 <TableCell>Vaqti</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {payments.map((p, i) => (
                 <TableRow key={p.id}>
-                  <TableCell>{i + 1}</TableCell>
+                  <TableCell>{(page - 1) * limit + i + 1}</TableCell>
                   {user?.role === "SUPERADMIN" && (
                     <TableCell>
                       {p.wallet?.user
@@ -357,21 +398,12 @@ const Tolovlar: React.FC = () => {
                         : "-"}
                     </TableCell>
                   )}
+                  <TableCell>{renderAmount(p)}</TableCell>
                   <TableCell>
-                    {Number(p.amount).toLocaleString("uz-UZ")} so‘m
+                    {p.type === "DEBIT" ? "Chiqarildi" : "Kiritildi"}
                   </TableCell>
-                  <TableCell>Paid</TableCell>
                   <TableCell>{p.source || "Naqd"}</TableCell>
-                  <TableCell>
-                    {(() => {
-                      const d = new Date(p.createdAt);
-                      return `${d.getDate()} ${
-                        uzMonths[d.getMonth()]
-                      }, ${d.getFullYear()} ${d.getHours()}:${String(
-                        d.getMinutes()
-                      ).padStart(2, "0")}`;
-                    })()}
-                  </TableCell>
+                  <TableCell>{formatDate(p.createdAt)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -379,18 +411,34 @@ const Tolovlar: React.FC = () => {
         </TableContainer>
       )}
 
-      {/* Modal */}
+      {/* Sahifalash */}
+      {totalPages > 1 && (
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={(e, newPage) => setPage(newPage)}
+            color="primary"
+            showFirstButton
+            showLastButton
+          />
+        </Box>
+      )}
+
+      {/* 💳 Dialog */}
       <Dialog
         open={openDialog}
         onClose={() => setOpenDialog(false)}
         fullWidth
         maxWidth="xs"
-        PaperProps={{
-          sx: { borderRadius: 3, p: 1, backdropFilter: "blur(5px)" },
-        }}
+        PaperProps={{ sx: { borderRadius: 3 } }}
       >
         <DialogTitle sx={{ fontWeight: "bold" }}>
-          {step === 1
+          {actionType.includes("mass")
+            ? actionType === "massAdd"
+              ? "Umumiy to‘lov qilish"
+              : "Umumiy to‘lov ayirish"
+            : step === 1
             ? "Kimlarga to‘lov qilasiz?"
             : actionType === "add"
             ? "Summani qo‘shish"
@@ -398,26 +446,66 @@ const Tolovlar: React.FC = () => {
         </DialogTitle>
 
         <DialogContent>
-          {step === 1 ? (
+          {/* Umumiy (mass) */}
+          {actionType.includes("mass") ? (
+            <>
+              <RadioGroup
+                value={selectedRole}
+                onChange={(e) => setSelectedRole(e.target.value)}
+                sx={{ mb: 2 }}
+              >
+                <FormControlLabel
+                  value="Adminlar"
+                  control={<Radio />}
+                  label="Adminlar"
+                />
+                <FormControlLabel
+                  value="Shifokorlar"
+                  control={<Radio />}
+                  label="Shifokorlar"
+                />
+                <FormControlLabel
+                  value="Bemorlar"
+                  control={<Radio />}
+                  label="Bemorlar"
+                />
+              </RadioGroup>
+              <TextField
+                label="Miqdor (so‘m)"
+                type="number"
+                fullWidth
+                sx={{ mb: 2 }}
+                value={
+                  actionType === "massDeduct" && !amountInput.startsWith("-")
+                    ? `-${amountInput}`
+                    : amountInput
+                }
+                onChange={(e) => setAmountInput(e.target.value)}
+              />
+              <TextField
+                label="Sarlavha"
+                fullWidth
+                sx={{ mb: 2 }}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+              <TextField
+                label="Xabar matni"
+                fullWidth
+                multiline
+                rows={3}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+              />
+            </>
+          ) : step === 1 ? (
             <RadioGroup
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value)}
             >
-              <FormControlLabel
-                value="Adminlar"
-                control={<Radio />}
-                label="Adminlar"
-              />
-              <FormControlLabel
-                value="Shifokorlar"
-                control={<Radio />}
-                label="Shifokorlar"
-              />
-              <FormControlLabel
-                value="Bemorlar"
-                control={<Radio />}
-                label="Bemorlar"
-              />
+              <FormControlLabel value="Adminlar" control={<Radio />} label="Adminlar" />
+              <FormControlLabel value="Shifokorlar" control={<Radio />} label="Shifokorlar" />
+              <FormControlLabel value="Bemorlar" control={<Radio />} label="Bemorlar" />
             </RadioGroup>
           ) : (
             <>
@@ -436,10 +524,15 @@ const Tolovlar: React.FC = () => {
                 ))}
               </Select>
               <TextField
-                label="Miqdor (so'm)"
+                label="Miqdor (so‘m)"
                 type="number"
                 fullWidth
-                value={amountInput}
+                sx={{ mb: 2 }}
+                value={
+                  actionType === "deduct" && !amountInput.startsWith("-")
+                    ? `-${amountInput}`
+                    : amountInput
+                }
                 onChange={(e) => setAmountInput(e.target.value)}
               />
             </>
@@ -447,15 +540,45 @@ const Tolovlar: React.FC = () => {
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Bekor qilish</Button>
-          {step === 1 ? (
-            <Button variant="contained" onClick={handleRoleSelect}>
-              Keyingi
-            </Button>
+          {actionType.includes("mass") ? (
+            <>
+              <Button onClick={() => setOpenDialog(false)}>Bekor qilish</Button>
+              <Button
+                onClick={handleMassAction}
+                variant="contained"
+                color={actionType === "massAdd" ? "primary" : "error"}
+              >
+                {actionType === "massAdd" ? "To‘lov qilish" : "To‘lov ayirish"}
+              </Button>
+            </>
+          ) : step === 1 ? (
+            <>
+              <Button onClick={() => setOpenDialog(false)}>Bekor qilish</Button>
+              <Button
+                variant="contained"
+                onClick={handleRoleSelect}
+                disabled={!selectedRole}
+              >
+                Davom etish
+              </Button>
+            </>
           ) : (
-            <Button variant="contained" onClick={handleWalletAction}>
-              Tasdiqlash
-            </Button>
+            <>
+              <Button
+                onClick={() => setStep(1)}
+                color="inherit"
+                sx={{ mr: 1 }}
+              >
+                Orqaga
+              </Button>
+              <Button
+                onClick={handleWalletAction}
+                variant="contained"
+                color={actionType === "add" ? "primary" : "error"}
+              >
+                {actionType === "add" ? "Qo‘shish" : "Ayirish"}
+              </Button>
+            </>
           )}
         </DialogActions>
       </Dialog>
@@ -465,7 +588,7 @@ const Tolovlar: React.FC = () => {
         open={snackbar.open}
         autoHideDuration={3000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
         <Alert
           severity={snackbar.severity}
