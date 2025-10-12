@@ -2,16 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import {
-  Box,
-  Typography,
-  Card,
-  CardMedia,
-  CardContent,
-  CircularProgress,
-  Button,
-  Grid,
-} from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/UseUserStore";
 
@@ -39,136 +30,244 @@ const TopDoctors: React.FC = () => {
   useEffect(() => {
     axios
       .get<Doctor[]>("https://faxriddin.bobur-dev.uz/User/top-doctors")
-      .then((res) => setDoctors(res.data.slice(0, 10) || [])) // faqat 10 ta shifokor
+      .then((res) => setDoctors(res.data.slice(0, 10) || []))
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
     return (
-      <Box
-        sx={{
-          py: 10,
+      <div
+        style={{
+          padding: "80px 0",
           minHeight: 300,
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          bgcolor: isDark ? "#0b1321" : "#fff",
+          backgroundColor: isDark ? "#0b1321" : "#fff",
         }}
       >
         <CircularProgress />
-      </Box>
+      </div>
     );
   }
 
   return (
-    <Box sx={{ py: 10, px: { xs: 2, md: 6 }, bgcolor: isDark ? "#0b1321" : "#fff" }}>
-      <Typography
-        variant="h4"
-        align="center"
-        fontWeight="bold"
-        gutterBottom
-        sx={{ mb: 6, color: isDark ? "#60a5fa" : "primary.main" }}
+    <div
+      style={{
+        padding: "80px 20px",
+        backgroundColor: isDark ? "#0b1321" : "#fff",
+        color: isDark ? "#fff" : "#000",
+      }}
+    >
+      <h2
+        style={{
+          textAlign: "center",
+          fontWeight: "bold",
+          marginBottom: "40px",
+          color: isDark ? "#60a5fa" : "#1976d2",
+          fontSize: "28px",
+        }}
       >
         Eng zo‘r Shifokorlar
-      </Typography>
+      </h2>
 
-      <Grid container spacing={3}>
-  {doctors.map((doctor) => {
-    const fullName = `${doctor.firstName} ${doctor.lastName}`;
-    const category = doctor.doctorProfile?.category?.name || "Shifokor";
-    const salary = doctor.doctorProfile?.salary?.[0]?.monthly || "Noma'lum";
-    const img =   doctor.profileImg || "./img/user.png"
-
-
-    return (
+      {/* Grid container */}
       <div
-  key={doctor.id}
-  style={{
-    flex: "1 1 calc(33.333% - 16px)", // 3 ta ustun, bo'sh joylarni hisobga olgan
-    margin: "8px", // Grid spacing o‘rniga
-  }}
->
-  <Card
-    sx={{
-      borderRadius: "20px",
-      overflow: "hidden",
-      cursor: "pointer",
-      transition: "transform 0.3s, boxShadow 0.3s",
-      bgcolor: isDark ? "#120C0B" : "#fff",
-      color: isDark ? "#fff" : "#000",
-      boxShadow: isDark
-        ? "0 6px 12px rgba(0,0,0,0.5)"
-        : "0 6px 12px rgba(0,0,0,0.1)",
-      "&:hover": { transform: "translateY(-5px)" },
-    }}
-    onClick={() => router.push(`/doctors/about/${doctor.id}`)}
-  >
-    <CardMedia
-      component="img"
-      image={img}
-      alt={fullName}
-      sx={{
-        height: 320,
-        objectFit: "cover",
-        filter: isDark ? "brightness(0.9)" : "none",
-      }}
-    />
-
-    <CardContent sx={{ textAlign: "center", p: 2 }}>
-      <Typography variant="h6" fontWeight="bold">
-        {fullName}
-      </Typography>
-
-      <Typography
-        sx={{
-          display: "inline-block",
-          px: 2,
-          py: 0.5,
-          my: 1,
-          borderRadius: "12px",
-          fontWeight: 500,
-          fontSize: 12,
-          color: isDark ? "#ccc" : "#555",
-          backgroundColor: isDark
-            ? "rgba(255,255,255,0.1)"
-            : "rgba(0,0,0,0.05)",
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+          gap: "24px",
+          maxWidth: "1200px",
+          margin: "0 auto",
         }}
       >
-        {category}
-      </Typography>
+        {doctors.map((doctor) => {
+          const fullName = `${doctor.firstName} ${doctor.lastName}`;
+          const category = doctor.doctorProfile?.category?.name || "Shifokor";
+          const img = doctor.profileImg || "./img/user.png";
 
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mt: 2,
-        }}
-      >
-        <Typography sx={{ fontWeight: 700 }}>
-          Oylik: {salary} so‘m
-        </Typography>
-        <Button
-          variant="contained"
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation();
-            router.push(`/doctors/about/${doctor.id}`);
-          }}
-        >
-          Batafsil
-        </Button>
-      </Box>
-    </CardContent>
-  </Card>
-</div>
+          const salaryStrings =
+            doctor.doctorProfile?.salary?.map((s) => s.monthly || "") || [];
+          const numericSalaries = salaryStrings
+            .map((s) => {
+              const digits = String(s).replace(/\D/g, "");
+              return digits ? Number(digits) : NaN;
+            })
+            .filter((n) => !Number.isNaN(n));
+          const firstSalary = salaryStrings[0] || "Noma'lum";
+          const avgSalary =
+            numericSalaries.length > 0
+              ? Math.round(
+                  numericSalaries.reduce((a, b) => a + b, 0) /
+                    numericSalaries.length
+                ).toLocaleString()
+              : "Noma'lum";
 
-    );
-  })}
-</Grid>
+          return (
+            <div
+              key={doctor.id}
+              onClick={() => router.push(`/doctors/about/${doctor.id}`)}
+              style={{
+                position: "relative",
+                borderRadius: "16px",
+                overflow: "hidden",
+                cursor: "pointer",
+                backgroundColor: isDark ? "#120C0B" : "#fff",
+                boxShadow: isDark
+                  ? "0 6px 18px rgba(0,0,0,0.5)"
+                  : "0 6px 18px rgba(2,6,23,0.08)",
+                display: "flex",
+                flexDirection: "column",
+                transition: "transform 300ms ease, box-shadow 300ms ease",
+                minHeight: 380, // kattaroq balandlik
+              }}
+              className="doctor-card"
+            >
+              {/* Image (biroz kattaroq nisbat, vizual kattaroqlik uchun) */}
+              <div
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  aspectRatio: "16/10",
+                  overflow: "hidden",
+                }}
+              >
+                <img
+                  src={img}
+                  alt={fullName}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    transition: "transform 0.35s ease",
+                    filter: isDark ? "brightness(0.95)" : "none",
+                  }}
+                  className="doctor-img"
+                />
+              </div>
 
-    </Box>
+              {/* Content */}
+              <div style={{ padding: "18px", flexGrow: 1 }}>
+                <h3
+                  style={{
+                    fontWeight: "700",
+                    fontSize: "18px",
+                    margin: 0,
+                    marginBottom: "8px",
+                  }}
+                >
+                  {fullName}
+                </h3>
+
+                <div
+                  style={{
+                    display: "inline-block",
+                    padding: "6px 12px",
+                    marginTop: "6px",
+                    borderRadius: "12px",
+                    fontSize: "13px",
+                    backgroundColor: isDark
+                      ? "rgba(255,255,255,0.04)"
+                      : "rgba(0,0,0,0.04)",
+                    color: isDark ? "#ccc" : "#555",
+                    width: "fit-content",
+                  }}
+                >
+                  {category}
+                </div>
+
+                {/* Short bio preview if exists */}
+                {doctor.doctorProfile?.bio ? (
+                  <p
+                    style={{
+                      marginTop: "12px",
+                      marginBottom: "18px",
+                      fontSize: "14px",
+                      lineHeight: 1.4,
+                      color: isDark ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.7)",
+                      maxHeight: "3.2em",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {doctor.doctorProfile.bio}
+                  </p>
+                ) : (
+                  <div style={{ height: 18 }} />
+                )}
+              </div>
+
+              {/* Bottom bar: doim ko'rinadi */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "12px 16px",
+                  borderTop: isDark ? "1px solid rgba(255,255,255,0.03)" : "1px solid rgba(0,0,0,0.06)",
+                  background: isDark ? "rgba(0,0,0,0.25)" : "transparent",
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: "14px" }}>
+                    Oylik: {firstSalary} so‘m
+                  </div>
+                </div>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation(); // karta clickni to'xtatadi
+                    router.push(`/doctors/about/${doctor.id}`);
+                  }}
+                  style={{
+                    backgroundColor: "#1976d2",
+                    color: "#fff",
+                    border: "none",
+                    padding: "8px 14px",
+                    borderRadius: "8px",
+                    fontSize: "14px",
+                    cursor: "pointer",
+                    boxShadow: "0 6px 14px rgba(25,118,210,0.15)",
+                    transition: "transform 150ms ease, box-shadow 150ms ease",
+                  }}
+                  aria-label={`Batafsil ${fullName}`}
+                >
+                  Batafsil
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Styles */}
+      <style jsx>{`
+        .doctor-card:hover {
+          transform: translateY(-10px);
+          box-shadow: ${isDark
+            ? "0 16px 40px rgba(0,0,0,0.6)"
+            : "0 16px 40px rgba(2,6,23,0.12)"};
+        }
+        .doctor-card:hover .doctor-img {
+          transform: scale(1.04);
+        }
+        @media (max-width: 900px) {
+          /* biroz kichikroq kartalar tablet uchun */
+          .doctor-card {
+            min-height: 360px;
+          }
+        }
+        @media (max-width: 600px) {
+          h2 {
+            font-size: 22px;
+          }
+          .doctor-card {
+            min-height: 340px;
+          }
+        }
+      `}</style>
+    </div>
   );
 };
 

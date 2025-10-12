@@ -2,19 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import {
-  Box,
-  Typography,
-  Card,
-  CardMedia,
-  CardContent,
-  CircularProgress,
-  Button,
-} from "@mui/material";
-import Slider from "react-slick";
 import { useRouter } from "next/navigation";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
 import { useUserStore } from "@/store/UseUserStore";
 import Header from "@/pages/Header";
 import Footer from "@/pages/Footer";
@@ -42,225 +30,244 @@ const Home: React.FC = () => {
   const { isDark } = useUserStore();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-
+  const [limit, setLimit] = useState(10);
+  const [total, setTotal] = useState(0);
   const router = useRouter();
-  const limit = 10;
 
-  const fetchDoctors = async (pageNumber = 1) => {
+  const fetchDoctors = async (limitValue = 10) => {
     setLoading(true);
     try {
       const res = await axios.get<DoctorsResponse>(
-        `https://faxriddin.bobur-dev.uz/User/doctors/All?limit=${limit}&page=${pageNumber}`
+        `https://faxriddin.bobur-dev.uz/User/doctors/All?limit=${limitValue}&page=1`
       );
       setDoctors(res.data.data);
-      setTotalPages(res.data.meta.totalPages);
-      setPage(pageNumber);
+      setTotal(res.data.meta.total);
     } catch (err) {
-      console.error("Doctorlarni yuklashda xatolik:", err);
+      console.error("Doktorlarni yuklashda xatolik:", err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchDoctors();
-  }, []);
+    fetchDoctors(limit);
+  }, [limit]);
 
-  const sliderSettings = {
-    dots: true,
-    infinite: true,
-    autoplay: true,
-    autoplaySpeed: 4000,
-    slidesToShow: 3,
-    slidesToScroll: 1,
-    responsive: [
-      { breakpoint: 1200, settings: { slidesToShow: 2 } },
-      { breakpoint: 768, settings: { slidesToShow: 1 } },
-    ],
+  const handleShowMore = () => {
+    setLimit((prev) => prev + 10);
   };
 
   return (
-    <Box sx={{ bgcolor: isDark ? "#0b1321" : "#fff", color: isDark ? "#fff" : "#000" }}>
+    <div
+      style={{
+        backgroundColor: isDark ? "#0b1321" : "#fff",
+        color: isDark ? "#fff" : "#000",
+      }}
+    >
       <Header />
 
-      {/* Biz haqimizda */}
-      <Box
-        sx={{
-          py: 20,
-          pt: 22,
-          px: 4,
-          background: isDark
-            ? "#0b1321"
-            : "linear-gradient(to bottom, #fff, #f2f2f2)",
-        }}
-      >
-        <Box
-          sx={{
-            maxWidth: 1200,
-            mx: "auto",
-            display: "flex",
-            flexDirection: { xs: "column", md: "row" },
-            gap: 10,
-            alignItems: "center",
+      {/* --- Tajribali Doktorlar --- */}
+      <section style={{ padding: "100px 20px" }}>
+        <h2
+          style={{
+            textAlign: "center",
+            fontSize: "2rem",
+            fontWeight: "bold",
+            color: "#007bff",
+            marginBottom: "50px",
           }}
         >
-          <Box sx={{ flex: 1 }}>
-            <Typography sx={{ fontSize: "30px", fontWeight: "bold", color: "primary.main" }} variant="h4" fontWeight="bold" gutterBottom color="primary">
-              ShifoYoli Sog'ligingizga   E'tiborli Yo'l
-            </Typography>
-            <Typography sx={{ fontSize: "1.22rem", opacity: 0.9 }}>
-              ShifoYoli kompaniyasi bemorlarga qulay va tezkor tibbiy xizmatlarni taqdim etish
-              maqsadida tashkil etilgan. Bizning asosiy faoliyatimiz: Yuqori malakali doktorlarni
-              topish, onlayn konsultatsiyalar va sog'liqni saqlash sohasida innovatsion yechimlar.
-            </Typography>
-          </Box>
-          <Box sx={{ flex: 1 }}>
-  <img
-    src="./img/chiroyli.jpg"
-    alt="Tibbiy xizmatlar"
-    style={{
-      width: "100%",        // mobil va kichik ekranlarda 100% kenglik
-      maxWidth: "400px",    // katta ekranlarda maksimal kenglik
-      height: "auto",       // balandlikni rasmga moslashtiradi
-      borderRadius: 16,
-      boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
-      display: "block",
-      margin: "0 auto",
-    }}
-  />
-</Box>
-
-        </Box>
-      </Box>
-
-      {/* Tajribali Doktorlar */}
-      <Box sx={{ py: 16, px: 4 }}>
-        <Typography
-          variant="h4"
-          align="center"
-          fontWeight="bold"
-          color="primary"
-          sx={{ mb: 4 }}
-        >
           Bizning Tajribali Doktorlarimiz
-        </Typography>
+        </h2>
 
         {loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
-            <CircularProgress />
-          </Box>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              padding: "80px 0",
+            }}
+          >
+            <div className="loader"></div>
+          </div>
         ) : (
-          <Slider {...sliderSettings}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+              gap: "30px",
+              maxWidth: "1300px",
+              margin: "0 auto",
+            }}
+          >
             {doctors.map((doctor) => {
               const fullName = `${doctor.firstName} ${doctor.lastName}`;
               const bio = doctor.doctorProfile?.bio || "Ma'lumot mavjud emas";
-              const category = doctor.doctorProfile?.category?.name || "Shifokor";
-              const img = doctor.profileImg
-                ? doctor.profileImg
-                : doctor.doctorProfile?.images?.[0]
-                ? `https://faxriddin.bobur-dev.uz/${doctor.doctorProfile.images[0]}`
-                : "https://via.placeholder.com/400x400";
+              const category =
+                doctor.doctorProfile?.category?.name || "Shifokor";
+              const img = doctor.profileImg || "/img/user.png";
 
               return (
-                <Box key={doctor.id} px={1}>
-                  <Card
-                    sx={{
-                      borderRadius: "20px",
-                      overflow: "hidden",
-                      position: "relative",
-                      transition: "0.3s",
-                      maxWidth: 425,
-                      mx: "auto",
-                      bgcolor: isDark ? "#120C0B" : "#fff",
-                      color: isDark ? "#fff" : "#000",
-                      boxShadow: isDark
-                        ? "0 6px 12px rgba(0,0,0,0.5)"
-                        : "0 6px 12px rgba(0,0,0,0.1)",
-                      "&:hover .hoverBox": { opacity: 1 },
-                      cursor: "pointer",
+                <div
+                  key={doctor.id}
+                  className="doctor-card"
+                  style={{
+                    backgroundColor: isDark ? "#120C0B" : "#fff",
+                    color: isDark ? "#fff" : "#000",
+                    borderRadius: "20px",
+                    overflow: "hidden",
+                    position: "relative", // <--- MUHIM!
+                    boxShadow: isDark
+                      ? "0 6px 12px rgba(0,0,0,0.5)"
+                      : "0 6px 12px rgba(0,0,0,0.1)",
+                    transition: "transform 0.3s, box-shadow 0.3s",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => router.push(`/doctors/about/${doctor.id}`)}
+                >
+                  <img
+                    src={img}
+                    alt={fullName}
+                    style={{
+                      width: "100%",
+                      height: "280px",
+                      objectFit: "cover",
+                      display: "block",
                     }}
-                    onClick={() => router.push(`/doctors/about/${doctor.id}`)}
-                  >
-                    <CardMedia
-                      component="img"
-                      image={img}
-                      alt={fullName}
-                      sx={{ height: 320, objectFit: "cover", filter: isDark ? "brightness(0.9)" : "none" }}
-                    />
-                    <CardContent sx={{ textAlign: "center", pt: 2, pb: 3 }}>
-                      <Typography variant="h6" fontWeight="bold">
-                        {fullName}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          mb: 1,
-                          display: "inline-block",
-                          px: 1.5,
-                          py: 0.5,
-                          borderRadius: "12px",
-                          fontWeight: 500,
-                          color: isDark ? "#ccc" : "#555",
-                          backgroundColor: isDark
-                            ? "rgba(255,255,255,0.1)"
-                            : "rgba(0,0,0,0.05)",
-                        }}
-                      >
-                        {category}
-                      </Typography>
-                    </CardContent>
+                    onError={(e) =>
+                      ((e.target as HTMLImageElement).src = "/img/user.png")
+                    }
+                  />
 
-                    <Box
-                      className="hoverBox"
-                      sx={{
-                        position: "absolute",
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        bgcolor: "rgba(0,0,0,0.75)",
-                        color: "white",
-                        p: 2,
-                        opacity: 0,
-                        transition: "opacity 0.3s ease-in-out",
-                        borderRadius: "0 0 20px 20px",
-                        minHeight: 80,
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "center",
+                  <div style={{ textAlign: "center", padding: "20px" }}>
+                    <h3
+                      style={{
+                        fontSize: "1.1rem",
+                        fontWeight: "bold",
+                        marginBottom: "6px",
                       }}
                     >
-                      <Typography variant="body2" gutterBottom noWrap>
-                        {bio}
-                      </Typography>
-                      <Button
-                        variant="contained"
-                        size="small"
-                        sx={{ mt: 1, alignSelf: "flex-start" }}
-                        onClick={() => router.push(`/doctors/about/${doctor.id}`)}
-                      >
-                        Batafsil
-                      </Button>
-                    </Box>
-                  </Card>
-                </Box>
+                      {fullName}
+                    </h3>
+                    <p
+                      style={{
+                        display: "inline-block",
+                        padding: "4px 10px",
+                        borderRadius: "10px",
+                        backgroundColor: isDark
+                          ? "rgba(255,255,255,0.1)"
+                          : "rgba(0,0,0,0.05)",
+                        color: isDark ? "#ccc" : "#555",
+                      }}
+                    >
+                      {category}
+                    </p>
+                  </div>
+
+                  {/* Hover info */}
+                  <div className="hover-info">
+                    <p>{bio.length > 100 ? bio.slice(0, 100) + "..." : bio}</p>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/doctors/about/${doctor.id}`);
+                      }}
+                    >
+                      Batafsil
+                    </button>
+                  </div>
+                </div>
               );
             })}
-          </Slider>
+          </div>
         )}
 
-        {page < totalPages && !loading && (
-          <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
-            <Button variant="contained" color="primary" onClick={() => fetchDoctors(page + 1)}>
+        {!loading && doctors.length < total && (
+          <div style={{ textAlign: "center", marginTop: "50px" }}>
+            <button
+              onClick={handleShowMore}
+              style={{
+                backgroundColor: "#007bff",
+                color: "#fff",
+                padding: "12px 40px",
+                border: "none",
+                borderRadius: "10px",
+                fontSize: "1rem",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
               Ko‘proq ko‘rish
-            </Button>
-          </Box>
+            </button>
+          </div>
         )}
-      </Box>
+      </section>
 
       <Footer />
-    </Box>
+
+      <style jsx>{`
+        .loader {
+          width: 50px;
+          height: 50px;
+          border: 4px solid #f3f3f3;
+          border-top: 4px solid #007bff;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        }
+
+        .doctor-card:hover {
+          transform: translateY(-6px);
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+        }
+
+        .hover-info {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          padding: 16px;
+          background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+          color: white;
+          opacity: 0;
+          transition: opacity 0.3s ease, transform 0.3s ease;
+          transform: translateY(20px);
+        }
+
+        .doctor-card:hover .hover-info {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .hover-info button {
+          background-color: #007bff;
+          border: none;
+          color: white;
+          padding: 6px 14px;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: 600;
+          margin-top: 8px;
+        }
+
+        @media (hover: none) {
+          .hover-info {
+            opacity: 1 !important;
+            transform: none !important;
+            position: relative;
+            background: transparent;
+            color: inherit;
+          }
+        }
+      `}</style>
+    </div>
   );
 };
 

@@ -63,7 +63,7 @@ const DoctorDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!doctorId) return router.push("/doctors");
+    if (!doctorId) return router.push("/");
     setLoading(true);
     axios
       .get(`${BASE_URL}/User/doctorOne/${doctorId}`)
@@ -73,6 +73,8 @@ const DoctorDetailPage: React.FC = () => {
         router.push("/");
       })
       .finally(() => setLoading(false));
+
+      console.log(doctor);
   }, [doctorId]);
 
   if (loading)
@@ -144,7 +146,7 @@ const DoctorDetailPage: React.FC = () => {
           }}
         >
           <img
-            src={doctor.profileImg || "https://via.placeholder.com/400x400"}
+            src={doctor.profileImg || "/img/user.png"}
             alt={fullName}
             style={{
               width: "100%",
