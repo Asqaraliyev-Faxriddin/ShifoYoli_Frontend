@@ -21,13 +21,15 @@ export default function Home() {
       <main className={`w-full pt-10  mt-[80px] ${isDark ? "bg-gray-900 text-white" : "bg-white  text-black"}`}  >
             <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-center justify-between px-4 py-16 gap-10">
               <div className="flex-1 space-y-5 text-center md:text-left ">
-                <h1 className="text-4xl md:text-5xl font-bold leading-snug w-[400px]">
+                <h1 className="text-4xl md:text-5xl font-bold leading-snug w-[330px] text-left">
                   <span className="bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 bg-clip-text text-transparent">
                   Shifokor bilan
                   </span>{" "}
-                  <span>{`masofadan tez va qulay bog‘laning!`}</span>
+
+                  <span className="w-[100px]">{`masofadan tez va qulay bog‘laning!`}</span>
+
                 </h1>
-                <p className={`text-lg ${isDark ? "text-gray-300" : "text-gray-600"}`}>
+                <p className={`text-lg  ${isDark ? "text-gray-300" : "text-gray-600"}`}>
                 Online shifokorlarni toping
                 </p>
               
