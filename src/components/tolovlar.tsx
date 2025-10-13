@@ -278,11 +278,13 @@ const Tolovlar: React.FC = () => {
     const color = isDebit ? "error.main" : "success.main";
     const sign = isDebit ? "-" : "+";
     return (
-      <Typography sx={{ color, fontWeight: 600 }}>
+      <Typography component="span" sx={{ color, fontWeight: 600 }}>
         {sign} {Number(p.amount).toLocaleString("uz-UZ")} so‘m
       </Typography>
     );
   };
+  
+  
   
 
   const formatDate = (date: string) => {
@@ -314,7 +316,7 @@ const Tolovlar: React.FC = () => {
           label="Boshlanish"
           value={startDate}
           onChange={(e) => setStartDate(e.target.value)}
-          sx={{ width: "150px" }}
+          sx={{ width: "50%" }}
           InputLabelProps={{ shrink: true }}
         />
         <TextField
@@ -322,7 +324,7 @@ const Tolovlar: React.FC = () => {
           label="Tugash"
           value={endDate}
           onChange={(e) => setEndDate(e.target.value)}
-          sx = {{width: "150px"}}
+          sx = {{width: "50%"}}
           InputLabelProps={{ shrink: true }}
         />
       </Stack>
@@ -345,7 +347,7 @@ const Tolovlar: React.FC = () => {
       sx={{
         backgroundColor: "#00bcd4",
         borderRadius: 3,
-        width: { xs: "100%", sm: "auto" },
+        width: { xs: "60%", sm: "auto" },
       }}
       onClick={() => {
         setActionType("add");
@@ -362,7 +364,7 @@ const Tolovlar: React.FC = () => {
       sx={{
         backgroundColor: "#f44336",
         borderRadius: 3,
-        width: { xs: "100%", sm: "auto" },
+        width: { xs: "60%", sm: "auto" },
       }}
       onClick={() => {
         setActionType("deduct");
@@ -444,7 +446,7 @@ const Tolovlar: React.FC = () => {
               {user?.role === "SUPERADMIN" && (
                 <TableCell>
                   {p.wallet?.user
-                    ? `${p.wallet.user.firstName} ${p.wallet.user.lastName}`
+                    ? `${p.wallet.user.firstName} ${p.wallet.user.lastName} (${p.wallet.user.email})`
                     : "-"}
                 </TableCell>
               )}
@@ -617,7 +619,7 @@ const Tolovlar: React.FC = () => {
                 <MenuItem value="">Foydalanuvchini tanlang</MenuItem>
                 {usersList.map((u) => (
                   <MenuItem key={u.id} value={u.id}>
-                    {u.firstName} {u.lastName}
+                    {u.firstName} {u.lastName} ({u.email})
                   </MenuItem>
                 ))}
               </Select>
