@@ -171,7 +171,7 @@ const FullTeachers: React.FC = () => {
               variant="contained"
               size="small"
               sx={{ mt: 2 }}
-              onClick={() => router.push(`/doctors/about/${doctor.id}`)}
+              onClick={() => router.push(`/doctors/about/${doctor.id}`)}  
             >
               Batafsil
             </Button>

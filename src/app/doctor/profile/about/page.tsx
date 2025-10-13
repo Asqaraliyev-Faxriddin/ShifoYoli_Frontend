@@ -16,6 +16,7 @@ import {
   MessageCircleMore,
   Menu as MenuIcon,
   List,
+  Stethoscope,
   UserX,
   MessageSquare,
 } from "lucide-react";
@@ -83,7 +84,13 @@ export default function ProfileLayout() {
       izohlar: { id: "notifications", label: "Izohlar", icon: <MessageCircleMore size={20} /> },
       xabarlashish: { id: "xabarlashish", label: "Xabarlashish", icon: <MessageSquare size={20} /> },
       tolovlar: { id: "settings", label: "To‘lovlar", icon: <Layers size={20} /> },
+      mybemors: { id: "mybemors", label: "Mening Bemorlarim", icon: <Users size={20} /> },
+
+      mydoctors: { id: "mydoctors", label: "Mening shifokorlarim", icon: <Stethoscope size={20} /> },
+
       sozlamalar: { id: "sozlamalar", label: "Sozlamalar", icon: <Settings size={20} /> },
+
+
       chiqish: { id: "chiqish", label: "Chiqish", icon: <LogOut size={20} /> },
     };
 
@@ -92,6 +99,7 @@ export default function ProfileLayout() {
       return [
         baseMenus.home,
         baseMenus.bemorlar,
+        baseMenus.mybemors,
         baseMenus.tolovlar,
         baseMenus.izohlar,
         baseMenus.kategoriyalar,
@@ -107,6 +115,7 @@ export default function ProfileLayout() {
         baseMenus.home,
       baseMenus.kategoriyalar,
         baseMenus.shifokorlar,
+        baseMenus.mydoctors,
         baseMenus.tolovlar,
         baseMenus.izohlar,
         baseMenus.xabarlashish,
@@ -120,6 +129,9 @@ export default function ProfileLayout() {
       baseMenus.home,
       baseMenus.shifokorlar,
       baseMenus.bemorlar,
+      baseMenus.mydoctors,
+      baseMenus.mybemors,
+      
       baseMenus.kategoriyalar,
       baseMenus.xabarlashish,
       baseMenus.tolovlar,
