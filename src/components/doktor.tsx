@@ -268,7 +268,7 @@ const Doktor: React.FC = () => {
       </div>
 
       {/* ✅ Faqat Chat_Doctor ni ochamiz */}
-      {isChatOpen && <Chat_Doctor doctorId={doctorId} onClose={handleCloseChat} />}
+      {isChatOpen && <Chat_Doctor  />}
     </div>
   );
 };
