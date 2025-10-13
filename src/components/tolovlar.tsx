@@ -29,6 +29,7 @@ import {
   Snackbar,
   Alert,
   Pagination,
+  Divider,
 } from "@mui/material";
 import { Add, Remove, Search, Groups } from "@mui/icons-material";
 
@@ -282,6 +283,7 @@ const Tolovlar: React.FC = () => {
       </Typography>
     );
   };
+  
 
   const formatDate = (date: string) => {
     const d = new Date(date);
@@ -302,18 +304,17 @@ const Tolovlar: React.FC = () => {
           placeholder="Ism yoki email orqali qidirish..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          fullWidth
           InputProps={{
             startAdornment: <Search sx={{ mr: 1, color: "gray" }} />,
           }}
-          sx={{ backgroundColor: "#fafafa", borderRadius: 3 }}
+          sx={{ backgroundColor: "#fafafa", borderRadius: 3,width: "300px" }}
         />
         <TextField
           type="date"
           label="Boshlanish"
           value={startDate}
           onChange={(e) => setStartDate(e.target.value)}
-          fullWidth
+          sx={{ width: "150px" }}
           InputLabelProps={{ shrink: true }}
         />
         <TextField
@@ -321,113 +322,192 @@ const Tolovlar: React.FC = () => {
           label="Tugash"
           value={endDate}
           onChange={(e) => setEndDate(e.target.value)}
-          fullWidth
+          sx = {{width: "150px"}}
           InputLabelProps={{ shrink: true }}
         />
       </Stack>
 
-      {/* To‘lov qilish, ayirish va umumiy tugmalar */}
-      {(user?.role === "SUPERADMIN" || user?.role === "ADMIN") && (
-        <Stack direction="row" spacing={2} sx={{ mb: 4, flexWrap: "wrap" }}>
-          <Button
-            startIcon={<Add />}
-            variant="contained"
-            sx={{ backgroundColor: "#00bcd4", borderRadius: 3 }}
-            onClick={() => {
-              setActionType("add");
-              setOpenDialog(true);
-              setStep(1);
-            }}
-          >
-            To‘lov qilish
-          </Button>
-          <Button
-            startIcon={<Remove />}
-            variant="contained"
-            sx={{ backgroundColor: "#f44336", borderRadius: 3 }}
-            onClick={() => {
-              setActionType("deduct");
-              setOpenDialog(true);
-              setStep(1);
-            }}
-          >
-            To‘lov ayirish
-          </Button>
-          <Button
-            startIcon={<Groups />}
-            variant="outlined"
-            sx={{ borderRadius: 3 }}
-            onClick={() => {
-              setActionType("massAdd");
-              setOpenDialog(true);
-              setStep(1);
-            }}
-          >
-            Umumiy to‘lov qilish
-          </Button>
-          <Button
-            startIcon={<Groups />}
-            variant="outlined"
-            color="error"
-            sx={{ borderRadius: 3 }}
-            onClick={() => {
-              setActionType("massDeduct");
-              setOpenDialog(true);
-              setStep(1);
-            }}
-          >
-            Umumiy to‘lov ayirish
-          </Button>
-        </Stack>
-      )}
+   {/* To‘lov qilish, ayirish va umumiy tugmalar */}
+{(user?.role === "SUPERADMIN" || user?.role === "ADMIN") && (
+  <Stack
+    direction="row"
+    spacing={2}
+    sx={{
+      mb: 4,
+      flexWrap: "wrap",
+      justifyContent: { xs: "center", sm: "flex-start" },
+      gap: 2,
+    }}
+  >
+    <Button
+      startIcon={<Add />}
+      variant="contained"
+      sx={{
+        backgroundColor: "#00bcd4",
+        borderRadius: 3,
+        width: { xs: "100%", sm: "auto" },
+      }}
+      onClick={() => {
+        setActionType("add");
+        setOpenDialog(true);
+        setStep(1);
+      }}
+    >
+      To‘lov qilish
+    </Button>
 
-      {/* Jadval */}
-      {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
-          <CircularProgress />
-        </Box>
-      ) : payments.length === 0 ? (
-        <Typography align="center" sx={{ mt: 4 }}>
-          To‘lovlar topilmadi.
-        </Typography>
-      ) : (
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>#</TableCell>
-                {user?.role === "SUPERADMIN" && (
-                  <TableCell>Foydalanuvchi</TableCell>
-                )}
-                <TableCell>Miqdori</TableCell>
-                <TableCell>Tipi</TableCell>
-                <TableCell>Manba</TableCell>
-                <TableCell>Vaqti</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {payments.map((p, i) => (
-                <TableRow key={p.id}>
-                  <TableCell>{(page - 1) * limit + i + 1}</TableCell>
-                  {user?.role === "SUPERADMIN" && (
-                    <TableCell>
-                      {p.wallet?.user
-                        ? `${p.wallet.user.firstName} ${p.wallet.user.lastName}`
-                        : "-"}
-                    </TableCell>
-                  )}
-                  <TableCell>{renderAmount(p)}</TableCell>
-                  <TableCell>
-                    {p.type === "DEBIT" ? "Chiqarildi" : "Kiritildi"}
-                  </TableCell>
-                  <TableCell>{p.source || "Naqd"}</TableCell>
-                  <TableCell>{formatDate(p.createdAt)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
+    <Button
+      startIcon={<Remove />}
+      variant="contained"
+      sx={{
+        backgroundColor: "#f44336",
+        borderRadius: 3,
+        width: { xs: "100%", sm: "auto" },
+      }}
+      onClick={() => {
+        setActionType("deduct");
+        setOpenDialog(true);
+        setStep(1);
+      }}
+    >
+      To‘lov ayirish
+    </Button>
+
+    <Button
+      startIcon={<Groups />}
+      variant="outlined"
+      sx={{
+        borderRadius: 3,
+        width: { xs: "100%", sm: "auto" },
+      }}
+      onClick={() => {
+        setActionType("massAdd");
+        setOpenDialog(true);
+        setStep(1);
+      }}
+    >
+      Umumiy to‘lov qilish
+    </Button>
+
+    <Button
+      startIcon={<Groups />}
+      variant="outlined"
+      color="error"
+      sx={{
+        borderRadius: 3,
+        width: { xs: "100%", sm: "auto" },
+      }}
+      onClick={() => {
+        setActionType("massDeduct");
+        setOpenDialog(true);
+        setStep(1);
+      }}
+    >
+      Umumiy to‘lov ayirish
+    </Button>
+  </Stack>
+)}
+
+{/* Jadval */}
+{loading ? (
+  <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
+    <CircularProgress />
+  </Box>
+) : payments.length === 0 ? (
+  <Typography align="center" sx={{ mt: 4 }}>
+    To‘lovlar topilmadi.
+  </Typography>
+) : (
+  <>
+    {/* Desktop table */}
+    <TableContainer
+      component={Paper}
+      sx={{ display: { xs: "none", md: "block" } }}
+    >
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>#</TableCell>
+            {user?.role === "SUPERADMIN" && (
+              <TableCell>Foydalanuvchi</TableCell>
+            )}
+            <TableCell>Miqdori</TableCell>
+            <TableCell>Tipi</TableCell>
+            <TableCell>Manba</TableCell>
+            <TableCell>Vaqti</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {payments.map((p, i) => (
+            <TableRow key={p.id}>
+              <TableCell>{(page - 1) * limit + i + 1}</TableCell>
+              {user?.role === "SUPERADMIN" && (
+                <TableCell>
+                  {p.wallet?.user
+                    ? `${p.wallet.user.firstName} ${p.wallet.user.lastName}`
+                    : "-"}
+                </TableCell>
+              )}
+              <TableCell>{renderAmount(p)}</TableCell>
+              <TableCell>
+                {p.type === "DEBIT" ? "Chiqarildi" : "Kiritildi"}
+              </TableCell>
+              <TableCell>{p.source || "Naqd"}</TableCell>
+              <TableCell>{formatDate(p.createdAt)}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+
+    {/* Mobil uchun card-view */}
+    <Stack spacing={2} sx={{ display: { xs: "flex", md: "none" } }}>
+      {payments.map((p, i) => (
+        <Paper
+          key={p.id}
+          elevation={2}
+          sx={{
+            p: 2,
+            borderRadius: 2,
+            borderLeft: `6px solid ${
+              p.type === "DEBIT" ? "#f44336" : "#00c853"
+            }`,
+          }}
+        >
+          <Typography variant="subtitle2" color="text.secondary">
+            #{(page - 1) * limit + i + 1}
+          </Typography>
+
+          {user?.role === "SUPERADMIN" && (
+            <Typography sx={{ fontWeight: 600 }}>
+              👤{" "}
+              {p.wallet?.user
+                ? `${p.wallet.user.firstName} ${p.wallet.user.lastName}`
+                : "—"}
+            </Typography>
+          )}
+
+          <Typography>
+            💰 <b>{renderAmount(p)}</b>
+          </Typography>
+
+          <Typography>
+            🔁 {p.type === "DEBIT" ? "Chiqarildi" : "Kiritildi"}
+          </Typography>
+
+          <Typography>📦 {p.source || "Naqd"}</Typography>
+
+          <Divider sx={{ my: 1 }} />
+
+          <Typography variant="body2" color="text.secondary">
+            🕒 {formatDate(p.createdAt)}
+          </Typography>
+        </Paper>
+      ))}
+    </Stack>
+  </>
+)}
+
 
       {/* Sahifalash */}
       {totalPages > 1 && (
