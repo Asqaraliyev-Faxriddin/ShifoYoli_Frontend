@@ -98,8 +98,14 @@ const DoctorDetailPage: React.FC = () => {
   const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
   const fullName = `${doctor.firstName} ${doctor.lastName}`;
   const category = profile?.category?.name || "Shifokor";
-  const images = profile?.images?.map((p) => `${BASE_URL}/${p}`) || [];
-  const videos = profile?.videos?.map((p) => `${BASE_URL}/${p}`) || [];
+  const images = Array.isArray(profile?.images)
+  ? profile.images.map((p) => `${BASE_URL}/${p}`)
+  : [];
+
+  const videos = Array.isArray(profile?.videos)
+  ? profile.videos.map((p) => `${BASE_URL}/${p}`)
+  : [];
+
   const futures = profile?.futures || [];
   const salary = profile?.salary?.[0];
 
