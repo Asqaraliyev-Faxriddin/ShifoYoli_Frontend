@@ -25,7 +25,13 @@ type Msg =
   | { id: string; type: "image"; url: string; mime: string; replyTo?: string; time: number }
   | { id: string; type: "file"; url: string; mime: string; replyTo?: string; time: number };
 
-export default function Chat_Doctor() {
+  interface ChatDoctorProps {
+    doctorId: string;
+    onClose: () => void;
+  }
+  
+
+  export default function Chat_Doctor({ doctorId, onClose }: ChatDoctorProps) {
   // Messages are client-only and will be reset on refresh (as requested)
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
