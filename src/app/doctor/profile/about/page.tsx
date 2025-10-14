@@ -260,53 +260,68 @@ export default function ProfileLayout() {
       
       {/* 1. Sidebar (Desktop) */}
       <aside
-        className={`hidden md:flex flex-col shadow-2xl p-4 transition-all duration-300 z-30 fixed left-0 top-0 bottom-0 
-        ${collapsed ? "w-20 items-center" : "w-64"} ${isDark ? "bg-gray-800" : "bg-white"} h-auto min-h-screen`}
-      >
-        
-        {/* Logo/Header */}
-        <div className="flex items-center justify-center mb-10 mt-2">
-          {!collapsed && (
-            <img
-              src={isDark ? "/img/logo-dark.svg" : "/img/logo.svg"}
-              alt="logo"
-              className="h-10 w-auto"
-            />
-          )}
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className={`p-2 ml-auto rounded-full transition ${isDark ? "text-gray-300 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100"} ${collapsed ? "ml-0" : ""}`}
-          >
-            {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-          </button>
-        </div>
+  className={`hidden md:flex flex-col shadow-2xl transition-all duration-300 z-30 fixed left-0 top-0 bottom-0
+    ${collapsed ? "w-20 items-center" : "w-64"}
+    ${isDark ? "bg-gray-800 text-gray-200" : "bg-white text-gray-800"}
+  `}
+>
+  {/* Logo/Header */}
+  <div
+    className={`flex items-center ${
+      collapsed ? "justify-center" : "justify-between"
+    } p-4 border-b ${isDark ? "border-gray-700" : "border-gray-200"}`}
+  >
+    {!collapsed && (
+      <img
+        src={isDark ? "/img/logo-dark.svg" : "/img/logo.svg"}
+        alt="logo"
+        className="h-10 w-auto"
+      />
+    )}
+    <button
+      onClick={() => setCollapsed(!collapsed)}
+      className={`p-2 rounded-full transition
+        ${isDark ? "text-gray-300 hover:bg-gray-700" : "text-gray-600 hover:bg-gray-100"}
+      `}
+    >
+      {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+    </button>
+  </div>
 
-        {/* Navigatsiya Menyu */}
-        <nav className="flex flex-col gap-2 flex-grow">
-          {menus.map((menu) => (
-            <button
-              key={menu.id}
-              onClick={() => (menu.id === "chiqish" ? handleLogout() : setActive(menu.id))}
-              className={`flex items-center gap-4 p-3 rounded-xl transition-all duration-200 
-                ${collapsed ? "justify-center" : ""} 
-                ${
-                  active === menu.id
-                    ? "bg-orange-500 text-white shadow-lg shadow-orange-500/50 font-semibold"
-                    : `hover:bg-blue-100 hover:text-blue-600 ${isDark ? "text-gray-300 dark:hover:bg-gray-700 dark:hover:text-orange-400" : "text-gray-700"}`
-                }`}
-            >
-              {menu.icon}
-              {!collapsed && <span className="text-left flex-1">{menu.label}</span>}
-              {/* Badge for notifications */}
-              {(menu.id === "notifications" ) && notifications > 0 && !collapsed && (
-                  <span className="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                      {notifications}
-                  </span>
-              )}
-            </button>
-          ))}
-        </nav>
-      </aside>
+  {/* Asosiy menyu scroll bo‘ladigan qism */}
+  <div className="flex-1 overflow-y-auto px-3 py-4">
+    <nav className="flex flex-col gap-2">
+      {menus.map((menu) => (
+        <button
+          key={menu.id}
+          onClick={() => (menu.id === "chiqish" ? handleLogout() : setActive(menu.id))}
+          className={`flex items-center gap-4 p-3 rounded-xl transition-all duration-200 
+            ${collapsed ? "justify-center" : ""}
+            ${
+              active === menu.id
+                ? "bg-orange-500 text-white shadow-lg shadow-orange-500/50 font-semibold"
+                : `hover:bg-blue-100 hover:text-blue-600 ${
+                    isDark
+                      ? "text-gray-300 dark:hover:bg-gray-700 dark:hover:text-orange-400"
+                      : "text-gray-700"
+                  }`
+            }`}
+        >
+          {menu.icon}
+          {!collapsed && <span className="text-left flex-1">{menu.label}</span>}
+          {(menu.id === "notifications") && notifications > 0 && !collapsed && (
+            <span className="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+              {notifications}
+            </span>
+          )}
+        </button>
+      ))}
+    </nav>
+  </div>
+
+
+</aside>
+
 
       {/* 2. Main Content Area */}
       <main className={`flex-1 p-4 md:p-8 transition-all duration-300 ${collapsed ? "md:ml-20" : "md:ml-64"}`}>
@@ -424,44 +439,55 @@ export default function ProfileLayout() {
 
       {/* 3. Mobile Sidebar (Modal) */}
       <div
-        ref={mobileMenuRef}
-        className={`fixed top-0 left-0 h-full w-full bg-black bg-opacity-50 z-50 transform md:hidden transition-opacity duration-300
-          ${isMobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+  ref={mobileMenuRef}
+  className={`fixed top-0 left-0 h-full w-full bg-black bg-opacity-50 z-50 transform md:hidden transition-opacity duration-300
+    ${isMobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+>
+  <aside
+    className={`absolute top-0 left-0 h-full w-64 flex flex-col shadow-2xl transition-transform duration-300 
+      ${isDark ? "bg-gray-800 text-white" : "bg-white text-black"}
+      ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
+    onClick={(e) => e.stopPropagation()}
+  >
+    {/* Yuqori qismlar */}
+    <div className="flex justify-end mb-4 p-2">
+      <button
+        onClick={() => setIsMobileMenuOpen(false)}
+        className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
       >
-          <aside 
-              className={`absolute top-0 left-0 h-full w-64 p-4 flex flex-col shadow-2xl transition-transform duration-300 
-                ${isDark ? "bg-gray-800 text-white" : "bg-white text-black"}
-                ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
-              onClick={(e) => e.stopPropagation()}
-          >
-              <div className="flex justify-end mb-6">
-                   <button
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                        <ChevronLeft size={24} />
-                    </button>
-              </div>
+        <ChevronLeft size={24} />
+      </button>
+    </div>
 
-              <nav className="flex flex-col gap-2">
-                {menus.map((menu) => (
-                  <button
-                    key={menu.id}
-                    onClick={() => handleMenuClick(menu.id)}
-                    className={`flex items-center gap-4 p-3 rounded-xl transition-all duration-200 text-left
-                      ${
-                        active === menu.id
-                          ? "bg-orange-500 text-white font-semibold shadow-md shadow-orange-500/50"
-                          : `hover:bg-blue-100 hover:text-blue-600 ${isDark ? "text-gray-300 dark:hover:bg-gray-700 dark:hover:text-orange-400" : "text-gray-700"}`
-                      }`}
-                  >
-                    {menu.icon}
-                    <span>{menu.label}</span>
-                  </button>
-                ))}
-              </nav>
-          </aside>
-      </div>
+    {/* Scroll bo‘ladigan qism */}
+    <div className="flex-1 overflow-y-auto px-2 pb-6">
+      <nav className="flex flex-col gap-2">
+        {menus.map((menu) => (
+          <button
+            key={menu.id}
+            onClick={() => handleMenuClick(menu.id)}
+            className={`flex items-center gap-4 p-3 rounded-xl transition-all duration-200 text-left
+              ${
+                active === menu.id
+                  ? "bg-orange-500 text-white font-semibold shadow-md shadow-orange-500/50"
+                  : `hover:bg-blue-100 hover:text-blue-600 ${
+                      isDark
+                        ? "text-gray-300 dark:hover:bg-gray-700 dark:hover:text-orange-400"
+                        : "text-gray-700"
+                    }`
+              }`}
+          >
+            {menu.icon}
+            <span>{menu.label}</span>
+          </button>
+        ))}
+      </nav>
+
+
+    </div>
+  </aside>
+</div>
+
       
     </div>
   );
