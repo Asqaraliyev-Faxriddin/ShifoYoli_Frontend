@@ -15,9 +15,10 @@ import {
   useTheme,
 } from "@mui/material";
 
-import { Info, MessageSquare, Briefcase, DollarSign } from "lucide-react";
+import { Info, MessageSquare, Briefcase, DollarSign, Router } from "lucide-react";
 import { useUserStore } from "@/store/UseUserStore";
 import Chat_Doctor from "./chat-doktor";
+import { useRouter } from "next/navigation";
 
 interface Salary {
   monthly: number;
@@ -58,6 +59,7 @@ const formatSalary = (salary: number | string | undefined): string => {
 const FullDoctors: React.FC = () => {
   const { isDark, SetDoctorId } = useUserStore();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const router = useRouter()
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -139,6 +141,7 @@ const FullDoctors: React.FC = () => {
       ) : (
         <Grid container spacing={4} justifyContent="center">
           {doctors.map((doctor) => {
+            const doctorProfileId = doctor.id
             const fullName = `${doctor.firstName} ${doctor.lastName}`;
             const category = doctor.doctorProfile?.category?.name || "Shifokor";
             const bioText = doctor.doctorProfile?.bio;
@@ -224,7 +227,7 @@ const FullDoctors: React.FC = () => {
                         py: 1.2,
                         borderRadius: "10px",
                       }}
-                      onClick={() => alert("Batafsil sahifasi hali tayyor emas")}
+                      onClick={() =>router.push(`/doctors/about/${doctorProfileId}`) }
                     >
                       Batafsil
                     </Button>

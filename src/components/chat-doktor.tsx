@@ -14,10 +14,13 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import PhoneIcon from "@mui/icons-material/Phone";
 import { DownloadIcon } from "lucide-react";
 import { DownloadDone } from "@mui/icons-material";
+import { useUserStore } from "@/store/UseUserStore";
+import { ArrowLeft } from "lucide-react";
 
 /**
  * Chat message shape
  */
+
 type Msg =
   | { id: string; type: "text"; text: string; replyTo?: string; edited?: boolean; time: number }
   | { id: string; type: "sticker"; sticker: string; replyTo?: string; time: number }
@@ -32,13 +35,19 @@ type Msg =
   
 
   export default function Chat_Doctor({ doctorId, onClose }: ChatDoctorProps) {
+
+    console.log(doctorId);
+    
   // Messages are client-only and will be reset on refresh (as requested)
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState("");
-  const [isDark, setIsDark] = useState(false);
+
+
+  const  {isDark,setIsDark} = useUserStore()
+
   const [showStickers, setShowStickers] = useState(false);
 
   // file input ref
@@ -243,6 +252,15 @@ type Msg =
     <div style={styles.root}>
       {/* Header */}
       <div style={styles.header}>
+
+      <button
+  style={styles.iconBtn()}
+  title="Orqaga"
+  onClick={onClose}
+>
+  <ArrowLeft style={{ color: isDark ? "#e6eef8" : "#0b1826" }} />
+</button>
+
         <div style={styles.headerLeft}>
           <div style={styles.avatar}>D</div>
           <div style={styles.headerInfo}>
@@ -252,6 +270,8 @@ type Msg =
         </div>
 
         <div style={styles.headerRight}>
+
+
           <button
             aria-label="call"
             title="Call"
@@ -268,7 +288,7 @@ type Msg =
             aria-label="toggle-theme"
             title={isDark ? "Switch to light" : "Switch to dark"}
             style={styles.iconBtn()}
-            onClick={() => setIsDark((s) => !s)}
+            onClick={() => setIsDark(!isDark)}
           >
             {isDark ? <LightModeIcon style={{ color: "#ffd86b" }} /> : <DarkModeIcon style={{ color: "#0b1826" }} />}
           </button>

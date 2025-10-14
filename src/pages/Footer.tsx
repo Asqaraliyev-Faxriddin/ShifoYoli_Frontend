@@ -37,7 +37,6 @@ function Footer() {
 
         {/* Title */}
         <h2 className="text-2xl md:text-3xl font-semibold flex items-center gap-2">
-          <LocalHospitalIcon className="text-blue-500" fontSize="large" />
           ShifoYoli – Sog‘liq yo‘lidagi hamrohingiz
         </h2>
 
