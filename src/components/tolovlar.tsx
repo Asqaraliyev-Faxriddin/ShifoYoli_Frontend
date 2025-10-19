@@ -133,7 +133,7 @@ const Tolovlar: React.FC = () => {
         setPayments(data.data || []);
         setTotal(data.total || 0);
       } catch (err) {
-        console.error(err);
+        return
       } finally {
         setLoading(false);
       }
@@ -419,7 +419,7 @@ const Tolovlar: React.FC = () => {
   </Box>
 ) : payments.length === 0 ? (
   <Typography align="center" sx={{ mt: 4 }}>
-    To‘lovlar topilmadi.
+    Sizni hali to‘lovlaringiz yo'q.
   </Typography>
 ) : (
   <>

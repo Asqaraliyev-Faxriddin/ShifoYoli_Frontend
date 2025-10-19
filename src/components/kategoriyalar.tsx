@@ -481,7 +481,7 @@ export default function Kategoriyalar() {
       }`}
     >
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-extrabold text-center mb-10 pt-4">Tibbiy Kategoriyalar Boshqaruvi</h1>
+        <h1 className="text-4xl font-extrabold text-center mb-10 pt-4">Tibbiy Kategoriyalar </h1>
 
         {/* Boshqaruv qismi (Qidiruv + Qo‘shish) */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
