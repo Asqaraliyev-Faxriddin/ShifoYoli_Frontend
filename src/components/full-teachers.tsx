@@ -46,6 +46,8 @@ const FullTeachers: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const Base_url = "https://faxriddin.bobur-dev.uz"
+
 
   const router = useRouter();
   const limit = 10;
@@ -54,7 +56,7 @@ const FullTeachers: React.FC = () => {
     setLoading(true);
     try {
       const res = await axios.get<DoctorsResponse>(
-        `https://faxriddin.bobur-dev.uz/User/doctors/All?limit=${limit}&page=${pageNumber}`
+        `${Base_url}/User/doctors/All?limit=${limit}&page=${pageNumber}`
       );
       setDoctors(res.data.data);
       setTotalPages(res.data.meta.totalPages);

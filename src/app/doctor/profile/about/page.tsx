@@ -33,6 +33,9 @@ import Notification from "@/components/notification";
 import Kategoriyalar from "@/components/kategoriyalar";
 import Bemorlar from "@/components/bemorlar";
 import Xabarlashish from "@/components/xabarlashish";
+import MyDocktors from "@/components/MyDoctors";
+import Mybemors from "@/components/Mybemors";
+import Check_Docktor from "@/components/Check_Docktor";
 
 function SlideTransition(props: SlideProps) {
   return <Slide {...props} direction="down" />;
@@ -57,6 +60,9 @@ type User = {
     isFalseRead: number;
   };
 } 
+
+
+const Base_url = "https://faxriddin.bobur-dev.uz"
 
 
 export default function ProfileLayout() {
@@ -85,6 +91,8 @@ export default function ProfileLayout() {
       xabarlashish: { id: "xabarlashish", label: "Xabarlashish", icon: <MessageSquare size={20} /> },
       tolovlar: { id: "settings", label: "To‘lovlar", icon: <Layers size={20} /> },
       mybemors: { id: "mybemors", label: "Mening Bemorlarim", icon: <Users size={20} /> },
+      checkDocktor: { id: "checkdocktor", label: "Shifokorlarni tekshirish", icon: <Users size={20} /> },
+
 
       mydoctors: { id: "mydoctors", label: "Mening shifokorlarim", icon: <Stethoscope size={20} /> },
 
@@ -98,7 +106,6 @@ export default function ProfileLayout() {
     if (role === "DOCTOR") {
       return [
         baseMenus.home,
-        baseMenus.bemorlar,
         baseMenus.mybemors,
         baseMenus.tolovlar,
         baseMenus.izohlar,
@@ -131,7 +138,7 @@ export default function ProfileLayout() {
       baseMenus.bemorlar,
       baseMenus.mydoctors,
       baseMenus.mybemors,
-      
+      baseMenus.checkDocktor,
       baseMenus.kategoriyalar,
       baseMenus.xabarlashish,
       baseMenus.tolovlar,
@@ -151,7 +158,7 @@ export default function ProfileLayout() {
         const token = localStorage.getItem("accessToken");
         if (!token) return router.push("/login");
 
-        const { data } = await axios.get("https://faxriddin.bobur-dev.uz/profile/my/profile", {
+        const { data } = await axios.get(`${Base_url}/profile/my/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -251,6 +258,18 @@ export default function ProfileLayout() {
         return <Bemorlar />;
       case "xabarlashish":
         return <Xabarlashish />;
+        case "checkdocktor":
+          return <Check_Docktor />;
+
+
+        case "mydoctors":
+          return <MyDocktors />;
+
+          
+        case "mybemors":
+          return <Mybemors />;
+
+
       default:
         return <HomeUser />;
     }

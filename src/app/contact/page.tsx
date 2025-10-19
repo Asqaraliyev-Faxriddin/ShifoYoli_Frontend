@@ -26,6 +26,9 @@ interface DoctorsResponse {
   meta: { total: number; page: number; limit: number; totalPages: number };
 }
 
+const Base_url = "https://faxriddin.bobur-dev.uz"
+
+
 const Home: React.FC = () => {
   const { isDark } = useUserStore();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -38,7 +41,7 @@ const Home: React.FC = () => {
     setLoading(true);
     try {
       const res = await axios.get<DoctorsResponse>(
-        `https://faxriddin.bobur-dev.uz/User/doctors/All?limit=${limitValue}&page=1`
+        `${Base_url}/User/doctors/All?limit=${limitValue}&page=1`
       );
       setDoctors(res.data.data);
       setTotal(res.data.meta.total);

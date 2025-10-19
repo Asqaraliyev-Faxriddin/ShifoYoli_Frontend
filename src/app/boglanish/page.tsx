@@ -27,6 +27,9 @@ interface BackendError {
   statusCode: number;
 }
 
+const Base_url = "https://faxriddin.bobur-dev.uz"
+
+
 export default function Contact(): JSX.Element {
   const { isDark } = useUserStore();
 
@@ -65,7 +68,7 @@ export default function Contact(): JSX.Element {
 
     try {
       const response = await axios.post(
-        "https://faxriddin.bobur-dev.uz/contacts/create",
+        `${Base_url}/contacts/create`,
         {
           email: formData.email,
           phone: formData.phone,

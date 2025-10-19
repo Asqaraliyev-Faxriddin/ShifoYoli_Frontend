@@ -56,6 +56,8 @@ export default function Profile() {
   const [alertMessage, setAlertMessage] = useState("");
   const [alertSeverity, setAlertSeverity] = useState<AlertColor>("error");
 
+  const Base_url = "https://faxriddin.bobur-dev.uz"
+
   // ✅ Ma'lumotlarni API dan yuklash
   useEffect(() => {
     async function fetchProfile() {
@@ -72,7 +74,7 @@ export default function Profile() {
 
       try {
         const response = await axios.get(
-          "https://faxriddin.bobur-dev.uz/profile/my/profile",
+          `${Base_url}/profile/my/profile`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,

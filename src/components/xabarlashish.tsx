@@ -54,6 +54,9 @@ interface Recipient {
   fullName?: string;
 }
 
+const Base_url = "https://faxriddin.bobur-dev.uz"
+
+
 // Ranglar palitrasi (Modern & Professional)
 const PRIMARY_COLOR_LIGHT = "#007AFF"; // Toza ko'k (Apple/Modern)
 const PRIMARY_COLOR_DARK = "#4B94FF"; // Dark mode uchun yengilroq ko'k
@@ -100,7 +103,7 @@ function Xabarlashish() {
         if (!token) return router.push("/");
 
         const { data } = await axios.get<{ data: Omit<User, "fullName"> }>(
-          "https://faxriddin.bobur-dev.uz/profile/my/profile",
+          `${Base_url}/profile/my/profile`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -125,7 +128,7 @@ function Xabarlashish() {
       const token = localStorage.getItem("accessToken");
       const endpoint = type === "bemors" ? "patients" : "doctors";
       const { data } = await axios.get<{ data: Recipient[] }>(
-        `https://faxriddin.bobur-dev.uz/admin/${endpoint}?limit=50&page=1`,
+        `${Base_url}/admin/${endpoint}?limit=50&page=1`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       const formattedRecipients: Recipient[] = (data.data || []).map((r) => ({
@@ -157,7 +160,7 @@ function Xabarlashish() {
         }
 
         await axios.post(
-          "https://faxriddin.bobur-dev.uz/contacts/create",
+          `${Base_url}/contacts/create`,
           {
             email: user.email,
             phone: user.phone || "+998901234567",
@@ -190,7 +193,7 @@ function Xabarlashish() {
           }
 
           await axios.post(
-            "https://faxriddin.bobur-dev.uz/admin/notification/send",
+            `${Base_url}/admin/notification/send`,
             { userId, message, title },
             {
               headers: {
@@ -202,7 +205,7 @@ function Xabarlashish() {
           showSnackbar(`Xabar ${email} manziliga yuborildi!`, "success");
         } else if (sendMode === "role") {
           await axios.post(
-            "https://faxriddin.bobur-dev.uz/admin/notification/all",
+            `${Base_url}/admin/notification/all`,
             { role: targetRole, message, title },
             {
               headers: {
@@ -214,7 +217,7 @@ function Xabarlashish() {
           showSnackbar(`${targetRole} foydalanuvchilariga yuborildi!`, "success");
         } else if (sendMode === "all") {
           await axios.post(
-            "https://faxriddin.bobur-dev.uz/admin/notification/broadcast",
+            `${Base_url}/admin/notification/broadcast`,
             { message, title },
             {
               headers: {

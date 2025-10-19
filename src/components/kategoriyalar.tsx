@@ -9,6 +9,9 @@ import axios from "axios";
 import Snackbar from "@mui/material/Snackbar"; // MUI Snackbar
 import MuiAlert, { AlertProps } from "@mui/material/Alert"; // MUI Alert
 
+
+const Base_url = "https://faxriddin.bobur-dev.uz"
+
 // --- MUI Alert Komponentasi ---
 // Snackbar ichida ishlatish uchun (forwardRef o'rniga oddiy funksiya bilan)
 const Alert = (props: AlertProps) => {
@@ -348,7 +351,7 @@ export default function Kategoriyalar() {
       const token = localStorage.getItem("accessToken");
       if (!token) return router.push("/login");
       try {
-        const { data } = await axios.get(`https://faxriddin.bobur-dev.uz/profile/my/profile`, {
+        const { data } = await axios.get(`${Base_url}/profile/my/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setRole(data.data.role);
@@ -366,7 +369,7 @@ export default function Kategoriyalar() {
       if (!token) return router.push("/login");
 
       const res = await axios.get(
-        `https://faxriddin.bobur-dev.uz/doctor-category/all?limit=${limit}&offset=${(sahifa - 1) * limit}`,
+        `${Base_url}/doctor-category/all?limit=${limit}&offset=${(sahifa - 1) * limit}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -405,7 +408,7 @@ export default function Kategoriyalar() {
     try {
         if (id) {
             // Tahrirlash (PATCH)
-            await axios.patch(`https://faxriddin.bobur-dev.uz/doctor-category/${id}`, formData, {
+            await axios.patch(`${Base_url}/doctor-category/${id}`, formData, {
                 headers: { 
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data',
@@ -415,7 +418,7 @@ export default function Kategoriyalar() {
 
         } else {
             // Yaratish (POST)
-            await axios.post(`https://faxriddin.bobur-dev.uz/doctor-category/create`, formData, {
+            await axios.post(`${Base_url}/doctor-category/create`, formData, {
                 headers: { 
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data',
@@ -451,7 +454,7 @@ export default function Kategoriyalar() {
     const token = localStorage.getItem("accessToken");
     if (!token) return router.push("/login");
     try {
-        await axios.delete(`https://faxriddin.bobur-dev.uz/doctor-category/delete/${id}`, {
+        await axios.delete(`${Base_url}/doctor-category/delete/${id}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
         setKategoriyalar((old) => old.filter((k) => k.id !== id));

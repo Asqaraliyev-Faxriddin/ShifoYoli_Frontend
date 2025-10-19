@@ -39,6 +39,9 @@ const months: { name: string; value: number }[] = [
   { name: "Dekabr", value: 12 },
 ];
 
+const Base_url = "https://faxriddin.bobur-dev.uz"
+
+
 export default function GooglePasswordForm() {
   const router = useRouter();
   const monthDropdownRef = useRef<HTMLDivElement>(null); // Oy dropdown uchun ref
@@ -168,7 +171,7 @@ export default function GooglePasswordForm() {
       if (!form.month) throw new Error("Oy tanlanishi shart");
 
       await axios.post(
-        "https://faxriddin.bobur-dev.uz/auth/google/password",
+        `${Base_url}/auth/google/password`,
         {
           password: form.password,
           age: Number(form.age),

@@ -89,6 +89,8 @@ const Tolovlar: React.FC = () => {
     severity: "success" as "success" | "error" | "info",
   });
 
+  const Base_url = "https://faxriddin.bobur-dev.uz"
+
   const limit = 10;
   const totalPages = Math.ceil(total / limit);
   const uzMonths = ["Yan", "Fev", "Mart", "Apr", "May", "Iyun", "Iyul", "Avg", "Sen", "Okt", "Noy", "Dek"];
@@ -99,7 +101,7 @@ const Tolovlar: React.FC = () => {
       try {
         const token = localStorage.getItem("accessToken");
         const { data } = await axios.get<{ data: User }>(
-          "https://faxriddin.bobur-dev.uz/profile/my/profile",
+          `${Base_url}/profile/my/profile`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setUser(data.data);
@@ -120,8 +122,8 @@ const Tolovlar: React.FC = () => {
         const offset = (page - 1) * limit;
         let url =
           user.role === "SUPERADMIN"
-            ? `https://faxriddin.bobur-dev.uz/payment/search?limit=${limit}&offset=${offset}`
-            : `https://faxriddin.bobur-dev.uz/payment/Payment/user?limit=${limit}&offset=${offset}`;
+            ? `${Base_url}/payment/search?limit=${limit}&offset=${offset}`
+            : `${Base_url}/payment/Payment/user?limit=${limit}&offset=${offset}`;
         if (search) url += `&firstName=${search}&email=${search}`;
         if (startDate) url += `&startDate=${startDate}`;
         if (endDate) url += `&endDate=${endDate}`;
@@ -146,11 +148,11 @@ const Tolovlar: React.FC = () => {
       const token = localStorage.getItem("accessToken");
       let url = "";
       if (selectedRole === "Adminlar")
-        url = "https://faxriddin.bobur-dev.uz/admin/admins";
+        url = `${Base_url}/admin/admins`
       else if (selectedRole === "Shifokorlar")
-        url = "https://faxriddin.bobur-dev.uz/admin/doctors";
+        url = `${Base_url}/admin/doctors`;
       else if (selectedRole === "Bemorlar")
-        url = "https://faxriddin.bobur-dev.uz/admin/patients";
+        url = `${Base_url}/admin/patients`;
 
       const { data } = await axios.get<{ data: User[] }>(url, {
         headers: { Authorization: `Bearer ${token}` },
@@ -178,7 +180,7 @@ const Tolovlar: React.FC = () => {
     }
     try {
       const token = localStorage.getItem("accessToken");
-      const url = `https://faxriddin.bobur-dev.uz/admin/wallet/${actionType}`;
+      const url = `${Base_url}/admin/wallet/${actionType}`;
       const amount =
         actionType === "deduct"
           ? -Math.abs(Number(amountInput))
@@ -239,7 +241,7 @@ const Tolovlar: React.FC = () => {
         Bemorlar: "BEMOR",
       };
   
-      const url = `https://faxriddin.bobur-dev.uz/admin/wallet/mass/${
+      const url = `${Base_url}/admin/wallet/mass/${
         actionType === "massAdd" ? "add" : "deduct"
       }`;
   
@@ -303,7 +305,7 @@ const Tolovlar: React.FC = () => {
       {/* 🔍 Qidiruv va filterlar */}
       <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mb: 3 }}>
         <TextField
-          placeholder="Ism yoki email orqali qidirish..."
+          placeholder="Ism/email qidirish..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           InputProps={{

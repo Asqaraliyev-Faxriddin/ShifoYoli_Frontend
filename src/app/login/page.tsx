@@ -31,6 +31,10 @@ interface LoginResponse {
   };
 }
 
+
+const Base_url = "https://faxriddin.bobur-dev.uz"
+
+
 export default function LoginForm() {
   const router = useRouter();
 
@@ -76,7 +80,7 @@ export default function LoginForm() {
 
     try {
       const res = await axios.post<LoginResponse>(
-        "https://faxriddin.bobur-dev.uz/auth/login",
+        `${Base_url}/auth/login`,
         form
       );
 

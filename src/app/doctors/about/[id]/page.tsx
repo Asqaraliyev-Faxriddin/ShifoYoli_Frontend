@@ -45,7 +45,7 @@ interface Doctor {
   doctorProfile?: DoctorProfile;
 }
 
-const BASE_URL = "https://faxriddin.bobur-dev.uz";
+const BASE_URL = "https://faxriddin.bobur-dev.uz"
 
 const formatPrice = (priceString?: string) => {
   if (!priceString) return "Ko‘rsatilmagan";

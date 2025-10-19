@@ -6,6 +6,9 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/UseUserStore";
 
+const Base_url = "https://faxriddin.bobur-dev.uz"
+
+
 interface DoctorProfile {
   bio: string;
   images: string[];
@@ -29,7 +32,7 @@ const TopDoctors: React.FC = () => {
 
   useEffect(() => {
     axios
-      .get<Doctor[]>("https://faxriddin.bobur-dev.uz/User/top-doctors")
+      .get<Doctor[]>(`${Base_url}/User/top-doctors`)
       .then((res) => setDoctors(res.data.slice(0, 10) || []))
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));

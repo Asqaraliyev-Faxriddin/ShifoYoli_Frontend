@@ -82,6 +82,9 @@ interface CustomTooltipProps {
   isDark: boolean;
 }
 
+const Base_url = "https://faxriddin.bobur-dev.uz"
+
+
 
 // Tooltip (oylik daromad uchun)
 const CustomTooltip = ({ active, payload, label, isDark }: CustomTooltipProps) => {
@@ -137,7 +140,7 @@ function HomeUser() {
         if (!token) return router.push("/");
 
         const { data } = await axios.get(
-          "https://faxriddin.bobur-dev.uz/profile/my/profile",
+            `${Base_url}/profile/my/profile`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -145,7 +148,7 @@ function HomeUser() {
 
         let profileImg = data.data.profileImg;
         if (profileImg && !profileImg.startsWith("http")) {
-          profileImg = `https://faxriddin.bobur-dev.uz/profiles/url/${profileImg}`;
+          profileImg = `${Base_url}/profiles/url/${profileImg}`;
         }
 
         const userData: User = {
@@ -165,7 +168,7 @@ function HomeUser() {
     async function fetchTopDoctors() {
       try {
         const { data } = await axios.get(
-          "https://faxriddin.bobur-dev.uz/User/top-doctors"
+          ` ${Base_url}/User/top-doctors`
         );
         setTopDoctors(data);
       } catch (error) {

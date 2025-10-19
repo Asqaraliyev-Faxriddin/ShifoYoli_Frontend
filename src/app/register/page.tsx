@@ -122,6 +122,8 @@
 
     // --- Icons (Inline SVG) ---
 
+    const Base_url = "https://faxriddin.bobur-dev.uz"
+
     const EyeIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" />
@@ -467,7 +469,7 @@
         setUser({...form,day:Number(form.day),month:Number(form.month),age:Number(form.age)})
 
         const res = await axios.post(
-            "https://faxriddin.bobur-dev.uz/verification/send",
+            `${Base_url}/verification/send`,
             {email:form.email,type:"register"}, 
         
         );
@@ -696,7 +698,7 @@
                     {/* Google Sign Up */}
                     <div className="mt-4">
     <button
-        onClick={() => window.location.href = "https://faxriddin.bobur-dev.uz/auth/google"}
+        onClick={() => window.location.href = `${Base_url}/auth/google`}
         className="w-full flex items-center justify-center gap-2 border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition"
     >
         <img

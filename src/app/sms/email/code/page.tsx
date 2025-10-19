@@ -29,6 +29,7 @@ type RegisterResponse = {
   message?: string;
 };
 
+
 export default function VerifyPage() {
   const router = useRouter();
   const user = useUserStore((s) => s.user);

@@ -1,548 +1,384 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-/** Material icons (maʼlumot uchun: npm i @mui/icons-material @mui/material @mui/system) */
-import SendIcon from "@mui/icons-material/Send";
-import InsertEmoticonIcon from "@mui/icons-material/InsertEmoticon";
-import AttachFileIcon from "@mui/icons-material/AttachFile";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import ReplyIcon from "@mui/icons-material/Reply";
-import CloseIcon from "@mui/icons-material/Close";
-import DarkModeIcon from "@mui/icons-material/DarkMode";
-import LightModeIcon from "@mui/icons-material/LightMode";
-import PhoneIcon from "@mui/icons-material/Phone";
-import { DownloadIcon } from "lucide-react";
-import { DownloadDone } from "@mui/icons-material";
+import { io, Socket } from "socket.io-client";
+import { Send, Edit2, Trash2, Paperclip, ArrowLeft, Moon, Sun, File } from "lucide-react";
 import { useUserStore } from "@/store/UseUserStore";
-import { ArrowLeft } from "lucide-react";
+import axios from "axios";
 
-/**
- * Chat message shape
- */
+interface ChatDoctorProps {
+  fullname?: string;
+  doctorId: string;
+  onClose: () => void;
+}
 
-type Msg =
-  | { id: string; type: "text"; text: string; replyTo?: string; edited?: boolean; time: number }
-  | { id: string; type: "sticker"; sticker: string; replyTo?: string; time: number }
-  | { id: string; type: "video"; url: string; mime: string; replyTo?: string; time: number }
-  | { id: string; type: "image"; url: string; mime: string; replyTo?: string; time: number }
-  | { id: string; type: "file"; url: string; mime: string; replyTo?: string; time: number };
+type MsgType = "TEXT" | "FILE" | "VIDEO";
 
-  interface ChatDoctorProps {
-    doctorId: string;
-    onClose: () => void;
-  }
-  
+interface Message {
+  id: string;
+  senderId: string;
+  message: string;
+  fileUrl?: string | null;
+  type: MsgType;
+  createdAt: string;
+}
 
-  export default function Chat_Doctor({ doctorId, onClose }: ChatDoctorProps) {
-
-    console.log(doctorId);
-    
-  // Messages are client-only and will be reset on refresh (as requested)
-  const [messages, setMessages] = useState<Msg[]>([]);
+export default function Chat_Doctor({ fullname,doctorId, onClose }: ChatDoctorProps) {
+  const { isDark, setIsDark } = useUserStore();
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [chatId, setChatId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-  const [replyTo, setReplyTo] = useState<string | null>(null);
-  const [editId, setEditId] = useState<string | null>(null);
-  const [editingText, setEditingText] = useState("");
+  const [editing, setEditing] = useState<Message | null>(null);
+  const [doctorOnline, setDoctorOnline] = useState(false);
+  const [lastSeen, setLastSeen] = useState<string | null>(null);
 
-
-  const  {isDark,setIsDark} = useUserStore()
-
-  const [showStickers, setShowStickers] = useState(false);
-
-  // file input ref
   const fileRef = useRef<HTMLInputElement | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
+  const Base_url = "https://faxriddin.bobur-dev.uz"
 
-  // Scroll to bottom when messages change (client-only)
+
+  // === 1. USERNI OLIB KELISH ===
+  useEffect(() => {
+    (async () => {
+      const token = localStorage.getItem("accessToken");
+      if (!token) return;
+      const { data } = await axios.get(`${Base_url}/profile/my/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUser(data.data);
+    })();
+  }, []);
+
+  // === 2. SOCKET ULASH ===
+  useEffect(() => {
+    if (!user) return;
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    const s = io(`${Base_url}`, {
+      transports: ["websocket"],
+      auth: { token },
+    });
+    setSocket(s);
+
+    s.on("connect", () => console.log("✅ Socket ulandi:", s.id));
+    s.on("disconnect", () => console.log("❌ Ulanish uzildi"));
+
+    s.on("chats_list", (res) => {
+      const chats = Array.isArray(res) ? res : res?.data ?? [];
+      if (!chats.length) {
+        s.emit("create_chat", { receiverId: doctorId });
+        return;
+      }
+      const chat = chats.find((c: any) => c.participants?.some((p: any) => p.userId === doctorId));
+      if (chat) {
+        setChatId(chat.id);
+        s.emit("get_messages", { chatId: chat.id });
+      } else {
+        s.emit("create_chat", { receiverId: doctorId });
+      }
+    });
+
+    s.on("chat_created", (res) => {
+      setChatId(res.chatId);
+    });
+
+    // === 3. XABARLARNI OLIB KELISH ===
+    s.on("messages_list", (res) => {
+      const arr = Array.isArray(res.data) ? res.data : [];
+      const fixed = arr.map((m: any) => {
+        const fullUrl =
+          m.type === "TEXT"
+            ? m.message
+            : m.message.startsWith("http")
+            ? m.message
+            : `${Base_url}/uploads/chat/${m.message}`;
+        return { ...m, fileUrl: fullUrl };
+      });
+      console.log("📨 Xabarlar:", fixed);
+      setMessages(fixed);
+    });
+
+    s.on("new_message", (msg: Message) => {
+      const fullUrl =
+        msg.type === "TEXT"
+          ? msg.message
+          : msg.message.startsWith("http")
+          ? msg.message
+          : `${Base_url}/uploads/chat/${msg.message}`;
+      setMessages((prev) => [...prev, { ...msg, fileUrl: fullUrl }]);
+    });
+
+    s.on("message_updated", (msg: Message) => {
+      setMessages((prev) => prev.map((m) => (m.id === msg.id ? { ...m, message: msg.message } : m)));
+    });
+
+    s.on("message_deleted", (payload: any) => {
+      const id = payload?.id ?? payload;
+      setMessages((prev) => prev.filter((m) => m.id !== id));
+    });
+
+    // === 4. ONLINE STATUS ===
+    s.emit("get_online_users");
+
+    s.on("online_users", (list: any) => {
+      const online = list.includes(doctorId);
+      setDoctorOnline(online);
+      if (!online) setLastSeen(null);
+    });
+
+    s.on("user_online", (data: any) => {
+      if (data.userId === doctorId) {
+        setDoctorOnline(data.online);
+        if (!data.online && data.lastSeen) setLastSeen(data.lastSeen);
+      }
+    });
+
+    s.emit("get_chats", {});
+    return () => {
+      s.disconnect();
+    };
+  }, [user, doctorId]);
+
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Utility: generate id on client only
-  const genId = () => {
-    if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-      // deterministic on client: only when called
-      // React hydration safe because not called during render
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      return crypto.randomUUID();
-    }
-    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-  };
+  // === 5. Xabar yuborish ===
+  const sendMessage = () => {
+    if (!socket || !user) return;
+    const text = input.trim();
+    if (!text) return;
 
-  // Send message handler (handles edit too)
-  const handleSend = () => {
-    const textToSend = editId ? editingText.trim() : input.trim();
-    if (!textToSend) return;
-
-    if (editId) {
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === editId && m.type === "text" ? { ...m, text: textToSend, edited: true, time: Date.now() } : m
-        )
-      );
-      setEditId(null);
-      setEditingText("");
+    if (editing) {
+      socket.emit("update_message", { messageId: editing.id, newText: text });
+      setEditing(null);
+      setInput("");
       return;
     }
 
-    const msg: Msg = {
-      id: genId(),
-      type: "text",
-      text: textToSend,
-      replyTo: replyTo || undefined,
-      time: Date.now(),
+    const tempMsg: Message = {
+      id: "temp-" + Date.now(),
+      senderId: user.id,
+      message: text,
+      type: "TEXT",
+      createdAt: new Date().toISOString(),
     };
-    setMessages((prev) => [...prev, msg]);
+    setMessages((prev) => [...prev, tempMsg]);
+
+    socket.emit("send_message", { chatId, receiverId: doctorId, message: text, type: "TEXT" });
     setInput("");
-    setReplyTo(null);
   };
 
-  // Delete
-  const handleDelete = (id: string) => {
-    setMessages((prev) => prev.filter((m) => m.id !== id));
-  };
-
-  // Start edit
-  const startEdit = (m: Msg) => {
-    if (m.type !== "text") return;
-    setEditId(m.id);
-    setEditingText(m.text);
-  };
-
-  // Send sticker
-  const sendSticker = (s: string) => {
-    const msg: Msg = { id: genId(), type: "sticker", sticker: s, replyTo: replyTo || undefined, time: Date.now() };
-    setMessages((p) => [...p, msg]);
-    setShowStickers(false);
-    setReplyTo(null);
-  };
-
-  // File selected
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // === 6. Fayl yuborish ===
+  const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-  
-    const url = URL.createObjectURL(file);
-    const mime = file.type || "application/octet-stream";
-  
-    let msg: Msg;
-  
-    if (mime.startsWith("image/")) {
-      msg = { id: genId(), type: "image", url, mime, replyTo: replyTo || undefined, time: Date.now() };
-    } else if (mime.startsWith("video/")) {
-      msg = { id: genId(), type: "video", url, mime, replyTo: replyTo || undefined, time: Date.now() };
-    } else {
-      msg = { id: genId(), type: "file", url, mime, replyTo: replyTo || undefined, time: Date.now() };
-    }
-  
-    setMessages((p) => [...p, msg]);
-    if (fileRef.current) fileRef.current.value = "";
-    setReplyTo(null);
-  };
-  
-  // Open a file message (image opens in new tab, file opens in new tab / download)
-  const openFile = (m: Msg) => {
-    if (m.type === "image" || m.type === "file") {
-      window.open(m.url, "_blank", "noopener");
-    }
-  };
-  
+    if (!file || !socket || !user) return;
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
 
+    const formData = new FormData();
+    formData.append("file", file);
 
-
-  // Cancel edit
-  const cancelEdit = () => {
-    setEditId(null);
-    setEditingText("");
-  };
-
-  // Render helpers
-  const formatTime = (t: number) => {
     try {
-      const d = new Date(t);
-      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    } catch {
-      return "";
+      const { data } = await axios.post(`${Base_url}/upload`, formData, {
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" },
+      });
+
+      const fileUrl = data.url;
+      const fileType: MsgType = file.type.startsWith("video/") ? "VIDEO" : "FILE";
+
+      const tempMsg: Message = {
+        id: "temp-" + Date.now(),
+        senderId: user.id,
+        message: fileUrl,
+        fileUrl,
+        type: fileType,
+        createdAt: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, tempMsg]);
+
+      socket.emit("send_message", { chatId, receiverId: doctorId, message: fileUrl, fileUrl, type: fileType });
+    } catch (err) {
+      console.error("❌ Fayl yuborilmadi:", err);
     }
+    e.target.value = "";
   };
 
-  // Styles (inline to avoid SSR style-injection mismatch)
+  const editMessage = (msg: Message) => {
+    setEditing(msg);
+    setInput(msg.message);
+  };
+
+  const deleteMessage = (id: string) => socket?.emit("delete_message", { messageId: id });
+
+  const formatTime = (t: string) =>
+    new Date(t).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+  const formatLastSeen = (time: string) => {
+    const d = new Date(time);
+    return `Oxirgi marta ${d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} da ko‘rilgan`;
+  };
+
+  // === 7. UI STYLE ===
   const styles = {
     root: {
       height: "100vh",
       display: "flex",
       flexDirection: "column" as const,
-      background: isDark ? "#0f1720" : "#f3f6f9",
+      background: isDark ? "#0b1220" : "#f3f6f9",
       color: isDark ? "#e6eef8" : "#0b1826",
-      fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial",
     },
     header: {
       display: "flex",
-      justifyContent: "space-between",
       alignItems: "center",
-      padding: "12px 16px",
-      background: isDark ? "#0b1318" : "#fff",
-      borderBottom: isDark ? "1px solid #12202a" : "1px solid #e6eef8",
+      gap: 12,
+      padding: "10px 16px",
+      borderBottom: "1px solid rgba(0,0,0,0.08)",
+      background: isDark ? "#071226" : "#fff",
     },
-    headerLeft: { display: "flex", gap: 12, alignItems: "center" },
-    avatar: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      background: "#2f80ed",
-      color: "white",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontWeight: 700,
-      fontSize: 18,
-    },
-    headerInfo: { display: "flex", flexDirection: "column" as const, lineHeight: 1 },
-    headerRight: { display: "flex", gap: 8, alignItems: "center" },
-    body: { flex: 1, overflowY: "auto" as const, padding: 16, display: "flex", flexDirection: "column" as const, gap: 12 },
-    bubble: (isMine = false) => ({
-      alignSelf: isMine ? "flex-end" : "flex-start",
-      background: isMine ? (isDark ? "#1f6feb" : "#d9fdd3") : isDark ? "#132031" : "#fff",
-      color: isMine ? (isDark ? "#fff" : "#082020") : (isDark ? "#e6eef8" : "#0b1826"),
-      padding: "10px 12px",
-      borderRadius: 12,
-      maxWidth: "76%",
-      boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
-      position: "relative" as const,
-    }),
-    bubbleMeta: { marginTop: 6, fontSize: 11, opacity: 0.75, textAlign: "right" as const },
-    controlsRow: { display: "flex", gap: 6, marginTop: 6 },
-    footer: {
-      padding: 10,
-      borderTop: isDark ? "1px solid #12202a" : "1px solid #e6eef8",
-      background: isDark ? "#0b1318" : "#fff",
-      display: "flex",
-      alignItems: "center",
-      gap: 8,
-    },
-    input: {
+    body: {
       flex: 1,
-      padding: "8px 12px",
-      borderRadius: 20,
-      border: "none",
-      outline: "none",
-      background: isDark ? "#0f2a3a" : "#f2f6fb",
-      color: isDark ? "#e6eef8" : "#0b1826",
-      fontSize: 15,
+      overflowY: "auto" as const,
+      padding: 16,
+      display: "flex",
+      flexDirection: "column" as const,
+      gap: 12,
     },
-    iconBtn: (bg?: string) => ({
-      background: bg || "transparent",
-      border: "none",
-      padding: 8,
-      borderRadius: 8,
-      cursor: "pointer",
-      display: "inline-flex",
-      alignItems: "center",
-      justifyContent: "center",
+    bubble: (mine: boolean) => ({
+      alignSelf: mine ? "flex-start" : "flex-end",
+      background: mine ? (isDark ? "#1f7a2b" : "#23c552") : (isDark ? "#111418" : "#0b1826"),
+      color: "#fff",
+      padding: "12px 16px",
+      borderRadius: 16,
+      maxWidth: "75%",
+      position: "relative" as const,
+      boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
     }),
-    stickerPanel: { display: "flex", gap: 8, padding: 8, justifyContent: "center", borderTop: "1px solid rgba(0,0,0,0.06)" },
-    replyPreview: { padding: "8px 12px", background: isDark ? "#07121a" : "#eef5ff", borderLeft: "3px solid #7aa7ff", display: "flex", justifyContent: "space-between", alignItems: "center" },
-    fileBlock: { display: "flex", alignItems: "center", gap: 10, padding: 8, borderRadius: 8, background: isDark ? "#07121a" : "#fbfdff", cursor: "pointer" },
+    actions: {
+      position: "absolute" as const,
+      top: 6,
+      right: 6,
+      display: "flex",
+      gap: 6,
+      cursor: "pointer",
+    },
   };
 
-  // NOTE: All render logic below is deterministic (no Date.now() in render; times are stored in messages created on client).
+  // === 8. RENDER ===
   return (
     <div style={styles.root}>
-      {/* Header */}
       <div style={styles.header}>
-
-      <button
-  style={styles.iconBtn()}
-  title="Orqaga"
-  onClick={onClose}
->
-  <ArrowLeft style={{ color: isDark ? "#e6eef8" : "#0b1826" }} />
-</button>
-
-        <div style={styles.headerLeft}>
-          <div style={styles.avatar}>D</div>
-          <div style={styles.headerInfo}>
-            <div style={{ fontWeight: 700 }}>Dr. Mohira Karimova</div>
-            <div style={{ fontSize: 13, color: isDark ? "#8fa6b8" : "#667887" }}>online</div>
-          </div>
-        </div>
-
-        <div style={styles.headerRight}>
-
-
-          <button
-            aria-label="call"
-            title="Call"
-            style={styles.iconBtn()}
-            onClick={() => {
-              // For demo: just alert. In real app integrate call flow.
-              alert("Qo'ng'iroq funksiyasi hali yo'q — demo.");
+        <button onClick={onClose}>
+          <ArrowLeft />
+        </button>
+        <div>
+          <div style={{ fontWeight: 700 }}>{fullname}</div>
+          <div
+            style={{
+              fontSize: 13,
+              color: doctorOnline ? "#16a34a" : "#dc2626",
+              fontWeight: 500,
             }}
           >
-            <PhoneIcon style={{ color: isDark ? "#e6eef8" : "#0b1826" }} />
-          </button>
-
-          <button
-            aria-label="toggle-theme"
-            title={isDark ? "Switch to light" : "Switch to dark"}
-            style={styles.iconBtn()}
-            onClick={() => setIsDark(!isDark)}
-          >
-            {isDark ? <LightModeIcon style={{ color: "#ffd86b" }} /> : <DarkModeIcon style={{ color: "#0b1826" }} />}
-          </button>
+            {doctorOnline
+              ? "🟢 Online"
+              : lastSeen
+              ? formatLastSeen(lastSeen)
+              : "🔴 Offline"}
+          </div>
+        </div>
+        <div style={{ marginLeft: "auto" }}>
+          <button onClick={() => setIsDark(!isDark)}>{isDark ? <Sun /> : <Moon />}</button>
         </div>
       </div>
 
-      {/* Body / messages */}
       <div style={styles.body}>
-        {messages.length === 0 && (
-          <div style={{ textAlign: "center", color: isDark ? "#7fa0b8" : "#789" }}>Chat bo'sh — birinchi xabarni yuboring</div>
-        )}
-
         {messages.map((m) => {
-          // all messages are "from user" in this demo app
-          const isMine = true;
-          if (m.type === "text") {
-            return (
-              <div key={m.id} style={styles.bubble(isMine)}>
-                {m.replyTo && (
-                  <div style={{ marginBottom: 6, fontSize: 12, opacity: 0.85, borderLeft: "3px solid #9fbfff", paddingLeft: 8 }}>
-                    ↩️ {messages.find((x) => x.id === m.replyTo)?.type === "text" ? (messages.find((x) => x.id === m.replyTo) as any).text : "Hujjat/rasm"}
-                  </div>
-                )}
-                <div style={{ whiteSpace: "pre-wrap" }}>{m.text}{m.edited ? " · (tahrirlangan)" : null}</div>
-                <div style={styles.bubbleMeta}>{formatTime(m.time)}</div>
+          const mine = m.senderId === user?.id;
+          const url = m.fileUrl || m.message;
+          const isImg = /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(url);
+          const isVid = /\.(mp4|webm|ogg|mov)$/i.test(url);
 
-                <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-                  <button style={styles.iconBtn()} title="reply" onClick={() => setReplyTo(m.id)}><ReplyIcon style={{ fontSize: 18, color: isDark ? "#bcd6ef" : "#3b6fb0" }} /></button>
-                  <button style={styles.iconBtn()} title="edit" onClick={() => startEdit(m)}><EditIcon style={{ fontSize: 18, color: isDark ? "#bcd6ef" : "#3b6fb0" }} /></button>
-                  <button style={styles.iconBtn()} title="delete" onClick={() => handleDelete(m.id)}><DeleteIcon style={{ fontSize: 18, color: "#d45252" }} /></button>
-                </div>
-              </div>
-            );
-          } else if (m.type === "sticker") {
-            return (
-              <div key={m.id} style={styles.bubble(isMine)}>
-                <div style={{ fontSize: 28 }}>{m.sticker}</div>
-                <div style={styles.bubbleMeta}>{formatTime(m.time)}</div>
-                <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-                  <button style={styles.iconBtn()} title="reply" onClick={() => setReplyTo(m.id)}><ReplyIcon style={{ fontSize: 18, color: isDark ? "#bcd6ef" : "#3b6fb0" }} /></button>
-                  <button style={styles.iconBtn()} title="delete" onClick={() => handleDelete(m.id)}><DeleteIcon style={{ fontSize: 18, color: "#d45252" }} /></button>
-                </div>
-              </div>
-            );
-          } else if (m.type === "image") {
-            return (
-              <div key={m.id} style={styles.bubble(isMine)}>
-                {m.replyTo && (
-                  <div style={{ marginBottom: 6, fontSize: 12, opacity: 0.85, borderLeft: "3px solid #9fbfff", paddingLeft: 8 }}>
-                    ↩️ {messages.find((x) => x.id === m.replyTo)?.type === "text" ? (messages.find((x) => x.id === m.replyTo) as any).text : "Hujjat/rasm"}
-                  </div>
-                )}
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  <img
-                    src={m.url}
-                    alt="preview"
-                    style={{ maxWidth: "320px", borderRadius: 8, objectFit: "cover", boxShadow: "0 6px 18px rgba(0,0,0,0.18)" }}
-                    onClick={() => openFile(m)}
-                  />
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div style={{ fontSize: 12, color: isDark ? "#9fb5c9" : "#4b647a" }}>{/* no filename shown per request */}</div>
-                    <div style={{ fontSize: 12, color: isDark ? "#9fb5c9" : "#4b647a" }}>{formatTime(m.time)}</div>
-                  </div>
-                </div>
+          return (
+            <div key={m.id} style={styles.bubble(mine)}>
+              {m.type === "TEXT" && <div>{m.message}</div>}
+              {m.type !== "TEXT" && (
+                <>
+                  {isImg ? (
+                    <img src={url} alt="image" style={{ maxWidth: 300, borderRadius: 8 }} />
+                  ) : isVid ? (
+                    <video src={url} controls style={{ maxWidth: 300, borderRadius: 8 }} />
+                  ) : (
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: "white", display: "flex", alignItems: "center", gap: 6 }}
+                    >
+                      <File size={18} /> Faylni ochish
+                    </a>
+                  )}
+                </>
+              )}
 
-                <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-                  <button style={styles.iconBtn()} title="reply" onClick={() => setReplyTo(m.id)}><ReplyIcon style={{ fontSize: 18, color: isDark ? "#bcd6ef" : "#3b6fb0" }} /></button>
-                  <button style={styles.iconBtn()} title="delete" onClick={() => handleDelete(m.id)}><DeleteIcon style={{ fontSize: 18, color: "#d45252" }} /></button>
+              {mine && (
+                <div style={styles.actions}>
+                  <Edit2 size={14} onClick={() => editMessage(m)} />
+                  <Trash2 size={14} onClick={() => deleteMessage(m.id)} />
                 </div>
+              )}
+              <div style={{ fontSize: 11, opacity: 0.8, marginTop: 6, textAlign: mine ? "left" : "right" }}>
+                {formatTime(m.createdAt)}
               </div>
-            );
-          } else if (m.type === "video") {
-            return (
-              <div key={m.id} style={styles.bubble(isMine)}>
-                {m.replyTo && (
-                  <div
-                    style={{
-                      marginBottom: 6,
-                      fontSize: 12,
-                      opacity: 0.85,
-                      borderLeft: "3px solid #9fbfff",
-                      paddingLeft: 8,
-                    }}
-                  >
-                    ↩️{" "}
-                    {messages.find((x) => x.id === m.replyTo)?.type === "text"
-                      ? (messages.find((x) => x.id === m.replyTo) as any).text
-                      : "Hujjat/video"}
-                  </div>
-                )}
-          
-                <video
-                  src={m.url}
-                  controls
-                  style={{
-                    maxWidth: "320px",
-                    borderRadius: 8,
-                    objectFit: "cover",
-                    boxShadow: "0 6px 18px rgba(0,0,0,0.18)",
-                  }}
-                />
-          
-                <div style={styles.bubbleMeta}>{formatTime(m.time)}</div>
-          
-                <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-                  <button
-                    style={styles.iconBtn()}
-                    title="Reply"
-                    onClick={() => setReplyTo(m.id)}
-                  >
-                    <ReplyIcon
-                      style={{ fontSize: 18, color: isDark ? "#bcd6ef" : "#3b6fb0" }}
-                    />
-                  </button>
-          
-                  <button
-                    style={styles.iconBtn()}
-                    title="Delete"
-                    onClick={() => handleDelete(m.id)}
-                  >
-                    <DeleteIcon style={{ fontSize: 18, color: "#d45252" }} />
-                  </button>
-          
-                  {/* 🆕 Yuklab olish tugmasi */}
-                  <a
-                    href={m.url}
-                    download={`video_${m.id}.mp4`}
-                    style={styles.iconBtn()}
-                    title="Videoni yuklab olish"
-                  >
-                    <DownloadIcon
-                      style={{ fontSize: 18, color: isDark ? "#9fe29b" : "#2e7d32" }}
-                    />
-                  </a>
-                </div>
-              </div>
-            );
-          }
-          
-          
-          
-          
-          else if (m.type === "file") {
-            // show generic file block (no filename), show extension or "Hujjat"
-            const ext = (() => {
-              try {
-                const parts = m.mime.split("/");
-                return parts[1] ? parts[1].toUpperCase() : "FILE";
-              } catch {
-                return "FILE";
-              }
-            })();
-            return (
-              <div key={m.id} style={styles.bubble(isMine)}>
-                {m.replyTo && (
-                  <div style={{ marginBottom: 6, fontSize: 12, opacity: 0.85, borderLeft: "3px solid #9fbfff", paddingLeft: 8 }}>
-                    ↩️ {messages.find((x) => x.id === m.replyTo)?.type === "text" ? (messages.find((x) => x.id === m.replyTo) as any).text : "Hujjat/rasm"}
-                  </div>
-                )}
-                <div style={styles.fileBlock} onClick={() => openFile(m)} title="Open file">
-                  <div style={{ width: 46, height: 46, borderRadius: 6, background: isDark ? "#081623" : "#eef6ff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700 }}>
-                    {ext.slice(0, 4)}
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column" }}>
-                    <div style={{ fontWeight: 700 }}>{/* no filename shown */}Hujjat</div>
-                    <div style={{ fontSize: 12, color: isDark ? "#9fb5c9" : "#4b647a" }}>{/* mime or size could go here */}</div>
-                  </div>
-                  <div style={{ marginLeft: "auto", fontSize: 12, color: isDark ? "#9fb5c9" : "#4b647a" }}>{formatTime(m.time)}</div>
-                </div>
-
-                <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-                  <button style={styles.iconBtn()} title="reply" onClick={() => setReplyTo(m.id)}><ReplyIcon style={{ fontSize: 18, color: isDark ? "#bcd6ef" : "#3b6fb0" }} /></button>
-                  <button style={styles.iconBtn()} title="delete" onClick={() => handleDelete(m.id)}><DeleteIcon style={{ fontSize: 18, color: "#d45252" }} /></button>
-                </div>
-              </div>
-            );
-          }
-
-          return null;
+            </div>
+          );
         })}
-
         <div ref={endRef} />
       </div>
 
-      {/* Sticker panel */}
-      {showStickers && (
-        <div style={styles.stickerPanel}>
-          {["😂", "❤️", "👍", "😎", "🔥", "😢", "🤗", "🎉"].map((s) => (
-            <button key={s} onClick={() => sendSticker(s)} style={{ fontSize: 20, padding: 8, border: "none", background: "transparent", cursor: "pointer" }}>
-              {s}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Reply preview */}
-      {replyTo && (
-        <div style={styles.replyPreview}>
-          <div style={{ fontSize: 13, color: isDark ? "#bcd6ef" : "#3b6fb0" }}>
-            ↩️ Javob:{" "}
-            <span style={{ color: isDark ? "#cfe7ff" : "#163b5a" }}>
-              {(() => {
-                const m = messages.find((x) => x.id === replyTo);
-                if (!m) return "—";
-                if (m.type === "text") return m.text.slice(0, 60) + (m.text.length > 60 ? "…" : "");
-                if (m.type === "sticker") return m.sticker;
-                if (m.type === "image") return "Rasm";
-                return "Hujjat";
-              })()}
-            </span>
-          </div>
-          <button style={styles.iconBtn()} onClick={() => setReplyTo(null)} title="Cancel reply"><CloseIcon /></button>
-        </div>
-      )}
-
-      {/* Footer / input */}
-      <div style={styles.footer}>
-        <button style={styles.iconBtn()} title="stickers" onClick={() => setShowStickers((s) => !s)}>
-          <InsertEmoticonIcon style={{ color: isDark ? "#e6eef8" : "#0b1826" }} />
+      <div
+        style={{
+          padding: 10,
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          borderTop: "1px solid rgba(0,0,0,0.06)",
+          background: isDark ? "#061123" : "#fff",
+        }}
+      >
+        <button onClick={() => fileRef.current?.click()}>
+          <Paperclip />
         </button>
-
-        <button style={styles.iconBtn()} title="attach" onClick={() => fileRef.current?.click()}>
-          <AttachFileIcon style={{ color: isDark ? "#e6eef8" : "#0b1826" }} />
-        </button>
-        <input ref={fileRef} type="file" style={{ display: "none" }} onChange={onFileChange} />
-
-        {/* If editing, show editingText; otherwise normal input */}
+        <input ref={fileRef} type="file" style={{ display: "none" }} accept="image/*,video/*" onChange={onFileChange} />
         <input
-          aria-label={editId ? "editing" : "message"}
-          value={editId ? editingText : input}
-          onChange={(e) => (editId ? setEditingText(e.target.value) : setInput(e.target.value))}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") handleSend();
-            if (e.key === "Escape" && editId) cancelEdit();
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          placeholder={editing ? "Xabarni tahrirlang..." : "Xabar yozing..."}
+          style={{
+            flex: 1,
+            borderRadius: 20,
+            border: "none",
+            padding: "8px 12px",
+            outline: "none",
+            background: isDark ? "#0b2a3a" : "#f2f6fb",
+            color: isDark ? "#e6eef8" : "#0b1826",
           }}
-          placeholder={editId ? "Xabarni tahrirlang..." : "Xabar yozing..."}
-          style={styles.input}
         />
-
-        {/* If editing show cancel button */}
-        {editId ? (
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={cancelEdit} style={styles.iconBtn()}>
-              <CloseIcon style={{ color: isDark ? "#fff" : "#0b1826" }} />
-            </button>
-            <button onClick={handleSend} style={{ ...styles.iconBtn(), background: "#1976d2", color: "#fff" }}>
-              <SendIcon />
-            </button>
-          </div>
-        ) : (
-          <button onClick={handleSend} style={{ ...styles.iconBtn(), background: "#1976d2", color: "#fff" }}>
-            <SendIcon />
-          </button>
-        )}
+        <button
+          onClick={sendMessage}
+          style={{
+            background: editing ? "#f59e0b" : "#1976d2",
+            color: "#fff",
+            borderRadius: 8,
+            padding: 8,
+          }}
+        >
+          <Send size={18} />
+        </button>
       </div>
     </div>
   );

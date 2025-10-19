@@ -7,12 +7,16 @@ import MuiAlert, { AlertColor, AlertProps } from "@mui/material/Alert";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/store/UseUserStore"; // ✅ Zustand store
 
+const Base_url = "https://faxriddin.bobur-dev.uz"
+
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
   ref
 ) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
+
+
 
 export default function EmailVerificationPage() {
   const router = useRouter();
@@ -33,7 +37,7 @@ export default function EmailVerificationPage() {
       setEmail(email);
 
       // ✅ OTP yuborish so‘rovi
-      await axios.post("https://faxriddin.bobur-dev.uz/verification/send", {
+      await axios.post(`${Base_url}/verification/send`, {
         type: "reset_password",
         email,
       });
