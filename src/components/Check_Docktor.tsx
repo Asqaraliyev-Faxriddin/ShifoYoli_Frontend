@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
+import { IMaskInput } from 'react-imask';
 
 // Axios importi
 import axios, { isAxiosError } from "axios";
@@ -21,7 +22,8 @@ import {
   FileText, // Yangi: Qo'shimcha fayllar uchun
   Zap,
   Unlock,
-  Lock, // Yangi: Futures uchun
+  Lock,
+  Delete, // Yangi: Futures uchun
 } from "lucide-react";
 import {
   Button,
@@ -445,135 +447,285 @@ function DoctorInfoModal({ doctor, onClose, isDark }: { doctor: Doctor, onClose:
         "&:last-child": { borderBottom: 'none' }
     };
     
-    // Serverdan kelgan rasmlarni URL formatida ko'rsatish funksiyasi
-    const renderMediaList = (items: string[] | undefined, icon: React.ReactNode, title: string) => {
-      if (!items) return null;
+// 📸 Media (rasm, video, fayl) ro‘yxatini ko‘rsatish funksiyasi
+const renderMediaList = (
+  items: any,
+  icon: React.ReactNode,
+  title: string,
+  size: "small" | "large" = "large"
+) => {
+  const BASE_URL = "https://faxriddin.bobur-dev.uz/";
 
-      // ⚙️ Har doim arrayga aylantiramiz
-      const safeItems = Array.isArray(items)
-          ? items
-          : typeof items === "string"
-          ? [items]
-          : [];
-  
-      if (safeItems.length === 0) return null;
+  // ⚙️ Ma’lumotni xavfsiz formatga o‘tkazamiz
+  const safeItems = Array.isArray(items)
+    ? items
+    : typeof items === "string"
+    ? [items]
+    : Array.isArray(items?.data)
+    ? items.data
+    : [];
 
+  // 📋 Agar massiv bo‘sh bo‘lsa ham sarlavha chiqadi
+  return (
+    <Box sx={{ mt: 3, mb: 1 }}>
+      <Typography
+        variant="subtitle1"
+        sx={{ color: highlightColor, fontWeight: "bold", mb: 1 }}
+      >
+        {title} ({safeItems.length})
+      </Typography>
 
+      {safeItems.length === 0 ? (
+        <Typography variant="body2" color="text.secondary">
+          Ma’lumot mavjud emas.
+        </Typography>
+      ) : (
+        <List dense sx={{ maxHeight: size === "small" ? 250 : 400, overflowY: "auto" }}>
+          {safeItems.map((url: string, index: number) => {
+              // ⚡️ Bo‘sh yoki noto‘g‘ri URL bo‘lsa, o'tkazib yuboramiz
+        if (!url || url.trim() === "" || url === "[]") return null;
 
-        return (
-            <Box sx={{ mt: 3, mb: 1 }}>
-                <Typography variant="subtitle1" sx={{ color: highlightColor, fontWeight: 'bold', mb: 1 }}>
-                    {title} ({items.length})
-                </Typography>
-                <List dense sx={{ maxHeight: 200, overflowY: 'auto' }}>
-                    {items.map((url, index) => (
-                        <ListItem key={index} sx={listItemStyle}>
-                            <ListItemIcon sx={{ minWidth: 30, color: highlightColor }}>{icon}</ListItemIcon>
-                            <ListItemText 
-                                primary={
-                                    <Tooltip title={url} arrow>
-                                        <Typography component="a" href={url} target="_blank" rel="noopener noreferrer" 
-                                            sx={{ 
-                                                fontSize: '0.875rem', 
-                                                color: defaultColor, 
-                                                cursor: 'pointer', 
-                                                textDecoration: 'underline', 
-                                                '&:hover': { opacity: 0.8 }
-                                            }}
-                                            className="truncate"
-                                        >
-                                            {url}
-                                        </Typography>
-                                    </Tooltip>
-                                }
-                            />
-                        </ListItem>
-                    ))}
-                </List>
-            </Box>
-        );
-    };
+        const fullUrl = url.startsWith("http") ? url : `${BASE_URL}${url}`;
+        const isVideo =
+          fullUrl.endsWith(".mp4") ||
+          fullUrl.endsWith(".webm") ||
+          fullUrl.includes("/videos/");
+        const isImage =
+          fullUrl.endsWith(".jpg") ||
+          fullUrl.endsWith(".jpeg") ||
+          fullUrl.endsWith(".png") ||
+          fullUrl.endsWith(".gif") ||
+          fullUrl.includes("/uploads/");
 
-    return (
-        <Box
-            sx={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                bgcolor: isDark ? "#1f2937" : "white",
-                color: defaultColor,
-                borderRadius: 4,
-                boxShadow: 24,
-                p: 4,
-                width: "90%",
-                maxWidth: 600,
-                outline: "none",
-                maxHeight: "90vh",
-                overflowY: "auto",
-            }}
-        >
-            <Typography variant="h5" component="h2" sx={{ mb: 3, fontWeight: "bold", color: highlightColor }}>
-                {doctor.firstName} {doctor.lastName} - To'liq Ma'lumot
-            </Typography>
+        const imgWidth = size === "large" ? 200 : 90;
+        const imgHeight = size === "large" ? 130 : 60;
+        const vidWidth = size === "large" ? 280 : 140;
+        const vidHeight = size === "large" ? 160 : 80;
 
-            <List>
-                <ListItem sx={listItemStyle}>
-                    <ListItemIcon><Phone className="w-5 h-5 text-blue-400" /></ListItemIcon>
-                    <ListItemText primary={<span className="font-semibold">Telefon:</span>} secondary={doctor.phoneNumber || "Kiritilmagan"} />
-                </ListItem>
-                <ListItem sx={listItemStyle}>
-                    <ListItemIcon><Layers className="w-5 h-5 text-blue-400" /></ListItemIcon>
-                    <ListItemText primary={<span className="font-semibold">Kategoriya:</span>} secondary={doctor.categoryName || "Noma'lum"} />
-                </ListItem>
-                <ListItem sx={listItemStyle}>
-                    <ListItemIcon><DollarSign className="w-5 h-5 text-blue-400" /></ListItemIcon>
-                    <ListItemText primary={<span className="font-semibold">Kunlik maosh:</span>} secondary={`${new Intl.NumberFormat('uz-UZ').format(doctor.dailySalary || 0)} so‘m`} />
-                </ListItem>
-                <ListItem sx={listItemStyle}>
-                    <ListItemIcon><CheckCircle className="w-5 h-5 text-blue-400" /></ListItemIcon>
-                    <ListItemText primary={<span className="font-semibold">Nashr holati:</span>} secondary={doctor.published ? "Nashr qilingan (✅)" : "Nashrdan olingan (🛑)"} />
-                </ListItem>
-                <ListItem sx={listItemStyle}>
-                    <ListItemIcon><CheckCircle className="w-5 h-5 text-blue-400" /></ListItemIcon>
-                    <ListItemText primary={<span className="font-semibold">Bepul xizmat:</span>} secondary={doctor.free ? "Ha (🟢)" : "Yo'q (🔴)"} />
-                </ListItem>
-                <ListItem sx={listItemStyle}>
-                    <ListItemIcon><FileText className="w-5 h-5 text-blue-400" /></ListItemIcon>
-                    <ListItemText primary={<span className="font-semibold">Biografiya:</span>} secondary={doctor.bio || "Kiritilmagan"} />
-                </ListItem>
-            </List>
+            return (
+              <ListItem
+                key={index}
+                sx={{
+                  ...listItemStyle,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  borderRadius: 2,
+                  p: 1,
+                  "&:hover": { backgroundColor: isDark ? "#2d2d2d" : "#f9f9f9" },
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <ListItemIcon sx={{ minWidth: 30, color: highlightColor }}>
+                    {icon}
+                  </ListItemIcon>
 
-            {/* Qo'shimcha ma'lumotlar: Images, Videos, Files, Futures */}
-            <Box sx={{ mt: 3, pt: 2, borderTop: `1px solid ${isDark ? '#374151' : '#e5e7eb'}` }}>
-                {renderMediaList(doctor.images, <Image className="w-4 h-4" />, "Rasmlar")}
-                {renderMediaList(doctor.videos, <Video className="w-4 h-4" />, "Videolar")}
-                {renderMediaList(doctor.files, <FileText className="w-4 h-4" />, "Fayllar")}
-                
-                {doctor.futures && doctor.futures.length > 0 && (
-                    <Box sx={{ mt: 3, mb: 1 }}>
-                        <Typography variant="subtitle1" sx={{ color: highlightColor, fontWeight: 'bold', mb: 1 }}>
-                            Kelajakdagi imkoniyatlar ({doctor.futures.length})
-                        </Typography>
-                        <List dense>
-                            {doctor.futures.map((future, index) => (
-                                <ListItem key={index} sx={listItemStyle}>
-                                    <ListItemIcon sx={{ minWidth: 30, color: highlightColor }}><Zap className="w-4 h-4" /></ListItemIcon>
-                                    <ListItemText primary={future} />
-                                </ListItem>
-                            ))}
-                        </List>
-                    </Box>
-                )}
-            </Box>
+                  {isImage ? (
+                    <img
+                      src={fullUrl}
+                      alt={`img-${index}`}
+                      style={{
+                        width: imgWidth,
+                        height: imgHeight,
+                        borderRadius: 8,
+                        objectFit: "cover",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => window.open(fullUrl, "_blank")}
+                    />
+                  ) : isVideo ? (
+                    <video
+                      src={fullUrl}
+                      width={vidWidth}
+                      height={vidHeight}
+                      controls
+                      style={{
+                        borderRadius: 8,
+                        background: "#000",
+                        cursor: "pointer",
+                      }}
+                    />
+                  ) : (
+                    <Tooltip title={fullUrl} arrow>
+                      <Typography
+                        component="a"
+                        href={fullUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        sx={{
+                          fontSize: "0.875rem",
+                          color: defaultColor,
+                          cursor: "pointer",
+                          textDecoration: "underline",
+                          "&:hover": { opacity: 0.8 },
+                        }}
+                        className="truncate"
+                      >
+                        {fullUrl}
+                      </Typography>
+                    </Tooltip>
+                  )}
+                </Box>
 
-            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 4 }}>
-                <Button onClick={onClose} color="inherit" variant="outlined" className="normal-case">
-                    Yopish
-                </Button>
-            </Box>
+                {/* 🗑️ O‘chirish icon */}
+                <Delete
+                  size={18}
+                  color="red"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => alert("Soxta o‘chirish!")}
+                />
+              </ListItem>
+            );
+          })}
+        </List>
+      )}
+    </Box>
+  );
+};
+
+// 📦 Asosiy modal komponenti
+return (
+  <Box
+    sx={{
+      position: "absolute",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      bgcolor: isDark ? "#1f2937" : "white",
+      color: defaultColor,
+      borderRadius: 4,
+      boxShadow: 24,
+      p: 4,
+      width: "90%",
+      maxWidth: 600,
+      outline: "none",
+      maxHeight: "90vh",
+      overflowY: "auto",
+    }}
+  >
+    <Typography
+      variant="h5"
+      component="h2"
+      sx={{ mb: 3, fontWeight: "bold", color: highlightColor }}
+    >
+      {doctor.firstName} {doctor.lastName} — To‘liq ma’lumot
+    </Typography>
+
+    <List>
+      <ListItem sx={listItemStyle}>
+        <ListItemIcon>
+          <Phone className="w-5 h-5 text-blue-400" />
+        </ListItemIcon>
+        <ListItemText
+          primary={<span className="font-semibold">Telefon:</span>}
+          secondary={doctor.phoneNumber || "Kiritilmagan"}
+        />
+      </ListItem>
+
+      <ListItem sx={listItemStyle}>
+        <ListItemIcon>
+          <Layers className="w-5 h-5 text-blue-400" />
+        </ListItemIcon>
+        <ListItemText
+          primary={<span className="font-semibold">Kategoriya:</span>}
+          secondary={doctor.categoryName || "Noma’lum"}
+        />
+      </ListItem>
+
+      <ListItem sx={listItemStyle}>
+        <ListItemIcon>
+          <DollarSign className="w-5 h-5 text-blue-400" />
+        </ListItemIcon>
+        <ListItemText
+          primary={<span className="font-semibold">Kunlik maosh:</span>}
+          secondary={`${new Intl.NumberFormat("uz-UZ").format(
+            doctor.dailySalary || 0
+          )} so‘m`}
+        />
+      </ListItem>
+
+      <ListItem sx={listItemStyle}>
+        <ListItemIcon>
+          <CheckCircle className="w-5 h-5 text-blue-400" />
+        </ListItemIcon>
+        <ListItemText
+          primary={<span className="font-semibold">Nashr holati:</span>}
+          secondary={
+            doctor.published
+              ? "Nashr qilingan (✅)"
+              : "Nashrdan olingan (🛑)"
+          }
+        />
+      </ListItem>
+
+      <ListItem sx={listItemStyle}>
+        <ListItemIcon>
+          <CheckCircle className="w-5 h-5 text-blue-400" />
+        </ListItemIcon>
+        <ListItemText
+          primary={<span className="font-semibold">Bepul xizmat:</span>}
+          secondary={doctor.free ? "Ha (🟢)" : "Yo‘q (🔴)"}
+        />
+      </ListItem>
+
+      <ListItem sx={listItemStyle}>
+        <ListItemIcon>
+          <FileText className="w-5 h-5 text-blue-400" />
+        </ListItemIcon>
+        <ListItemText
+          primary={<span className="font-semibold">Biografiya:</span>}
+          secondary={doctor.bio || "Kiritilmagan"}
+        />
+      </ListItem>
+    </List>
+
+    {/* 🔽 Qo‘shimcha ma’lumotlar */}
+    <Box
+      sx={{
+        mt: 3,
+        pt: 2,
+        borderTop: `1px solid ${isDark ? "#374151" : "#e5e7eb"}`,
+      }}
+    >
+      {renderMediaList(doctor.images, <Image className="w-5 h-5" />, "Rasmlar", "large")}
+      {renderMediaList(doctor.videos, <Video className="w-5 h-5" />, "Videolar", "large")}
+      {renderMediaList(doctor.files, <FileText className="w-5 h-5" />, "Fayllar", "small")}
+
+      {doctor.futures && doctor.futures.length > 0 && (
+        <Box sx={{ mt: 3, mb: 1 }}>
+          <Typography
+            variant="subtitle1"
+            sx={{ color: highlightColor, fontWeight: "bold", mb: 1 }}
+          >
+            Kelajakdagi imkoniyatlar ({doctor.futures.length})
+          </Typography>
+          <List dense>
+            {doctor.futures.map((future, index) => (
+              <ListItem key={index} sx={listItemStyle}>
+                <ListItemIcon sx={{ minWidth: 30, color: highlightColor }}>
+                  <Zap className="w-4 h-4" />
+                </ListItemIcon>
+                <ListItemText primary={future} />
+              </ListItem>
+            ))}
+          </List>
         </Box>
-    );
+      )}
+    </Box>
+
+    <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 4 }}>
+      <Button
+        onClick={onClose}
+        color="inherit"
+        variant="outlined"
+        className="normal-case"
+      >
+        Yopish
+      </Button>
+    </Box>
+  </Box>
+);
+
 }
 
 // 💻 Doktorlar Ro'yxati Komponenti
@@ -712,7 +864,6 @@ export default function Doctorlar() {
   };
   
 
-  // ➕ Yangi doktor qo‘shish (POST /admin/create/doctor)
   const handleAddDoctor = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedDoctor) return;
@@ -917,47 +1068,66 @@ export default function Doctorlar() {
           <span role="img" aria-label="doctor">
             👨‍⚕️
           </span>{" "}
-          Doktorlar Ro‘yxati
+          Shifokorlar Ro‘yxati
         </h1>
         <div className="flex gap-4">
-          <Button
-            variant="contained"
-            startIcon={<PlusCircle />}
-            onClick={() => {
-              setSelectedDoctor({
-                id: "",
-                firstName: "",
-                lastName: "",
-                email: "",
-                age: 30,
-                profileImg: null,
-                isActive: true,
-                blockedUser: null,
-                phoneNumber: '+998', // Default telefon raqami
-                categoryId: mockCategories[0].id, // Default kategoriya
-                categoryName: mockCategories[0].name,
-                bio: "",
-                dailySalary: 100000,
-                published: false,
-                images: [],
-                videos: [],
-                files: [],
-                futures: [],
-                free: false,
-              });
-              setPassword("");
-              setProfileImg(null);
-              setError(null);
-              setOpenAddModal(true);
-            }}
-            className="normal-case bg-green-500 hover:bg-green-600"
-            color="success"
-          >
-            Yangi doktor qo‘shish
-          </Button>
-        </div>
+  <Button
+    variant="contained"
+    startIcon={<PlusCircle />}
+    onClick={() => {
+      setSelectedDoctor({
+        id: "",
+        firstName: "",
+        lastName: "",
+        email: "",
+        age: 30,
+        profileImg: null,
+        isActive: true,
+        blockedUser: null,
+        phoneNumber: "+998",
+        categoryId: mockCategories[0].id,
+        categoryName: mockCategories[0].name,
+        bio: "",
+        dailySalary: 100000,
+        published: false,
+        images: [],
+        videos: [],
+        files: [],
+        futures: [],
+        free: false,
+      });
+      setPassword("");
+      setProfileImg(null);
+      setError(null);
+      setOpenAddModal(true);
+    }}
+    sx={{
+      textTransform: "none", // "normal-case" o‘rniga
+      backgroundColor: "#22c55e", // Tailwind: bg-green-500
+      color: "white",
+      fontWeight: 600,
+      px: 2.5,
+      py: 1,
+      borderRadius: 2,
+      boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+      transition: "all 0.3s ease",
+      "&:hover": {
+        backgroundColor: "#16a34a", // Tailwind: bg-green-600
+        transform: "scale(1.04)",
+        boxShadow: "0 4px 10px rgba(0,0,0,0.25)",
+      },
+      "&:active": {
+        transform: "scale(0.98)",
+      },
+    }}
+  >
+     Shifokor qo‘shish
+  </Button>
+</div>
+
       </div>
 
+      renderMediaList
       {/* 🔍 Qidiruv */}
       <form
         onSubmit={handleSearch}
@@ -974,15 +1144,35 @@ export default function Doctorlar() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <Button
-          type="submit"
-          variant="contained"
-          startIcon={<Search />}
-          className="normal-case h-auto"
-          color="success"
-        >
-          Qidirish
-        </Button>
+   <Button
+  type="submit"
+  variant="contained"
+  startIcon={<Search />}
+  color="success"
+  sx={{
+    textTransform: "none", // "normal-case"
+    height: "auto",
+    px: 2.5,
+    py: 1,
+    backgroundColor: "#22c55e", // Tailwind: bg-green-500
+    color: "white",
+    fontWeight: 600,
+    borderRadius: 2,
+    boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+    transition: "all 0.3s ease",
+    "&:hover": {
+      backgroundColor: "#16a34a", // Tailwind: bg-green-600
+      transform: "scale(1.05)",
+      boxShadow: "0 4px 10px rgba(0,0,0,0.25)",
+    },
+    "&:active": {
+      transform: "scale(0.97)",
+    },
+  }}
+>
+  Qidirish
+</Button>
+
       </form>
 
       {alert && (
@@ -1042,11 +1232,16 @@ export default function Doctorlar() {
                         {doctor.email}
                       </p>
                     </Tooltip>
-                    <p className="text-sm flex items-center gap-1">
+               
+                    <Tooltip title={`${doctor.categoryName}`} arrow>
+                    <p className="text-sm flex items-center gap-1 truncate">
                       <Layers className="w-4 h-4 text-green-500" />
                       <span className="font-medium">Kategoriya:</span>{" "}
                       {doctor.categoryName}
                     </p>
+                    </Tooltip>
+
+
                     <p className="text-sm flex items-center gap-1">
                       <DollarSign className="w-4 h-4 text-yellow-500" />
                       <span className="font-medium">Kunlik maosh:</span>{" "}
@@ -1094,6 +1289,8 @@ export default function Doctorlar() {
                       Nashr qilish
                     </Button>
                   )}
+
+ 
 
                   {/* Tahrirlash */}
                   <Button
