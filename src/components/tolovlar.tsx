@@ -32,6 +32,7 @@ import {
   Divider,
 } from "@mui/material";
 import { Add, Remove, Search, Groups } from "@mui/icons-material";
+import { useUserStore } from "@/store/UseUserStore";
 
 interface User {
   id: string;
@@ -83,6 +84,7 @@ const Tolovlar: React.FC = () => {
   const [usersList, setUsersList] = useState<User[]>([]);
   const [message, setMessage] = useState("");
   const [title, setTitle] = useState("");
+  const {isDark} = useUserStore()
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -303,33 +305,97 @@ const Tolovlar: React.FC = () => {
       </Typography>
 
       {/* 🔍 Qidiruv va filterlar */}
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mb: 3 }}>
-        <TextField
-          placeholder="Ism/email qidirish..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          InputProps={{
-            startAdornment: <Search sx={{ mr: 1, color: "gray" }} />,
-          }}
-          sx={{ backgroundColor: "#fafafa", borderRadius: 3,width: "300px" }}
-        />
-        <TextField
-          type="date"
-          label="Boshlanish"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          sx={{ width: "50%" }}
-          InputLabelProps={{ shrink: true }}
-        />
-        <TextField
-          type="date"
-          label="Tugash"
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-          sx = {{width: "50%"}}
-          InputLabelProps={{ shrink: true }}
-        />
-      </Stack>
+      <Stack
+  direction={{ xs: "column", sm: "row" }}
+  spacing={2}
+  sx={{
+    mb: 3,
+    bgcolor: isDark ? "#0b1321" : "#fff",
+    color: isDark ? "#fff" : "#000",
+    p: 2,
+    borderRadius: 3,
+  }}
+>
+  {/* Qidirish input */}
+  <TextField
+    placeholder="Ism/email qidirish..."
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+    InputProps={{
+      startAdornment: <Search sx={{ mr: 1, color: isDark ? "#9ca3af" : "gray" }} />,
+      style: {
+        color: isDark ? "#fff" : "#000",
+        backgroundColor: isDark ? "#1e293b" : "#fafafa",
+        borderRadius: 12,
+      },
+    }}
+    sx={{
+      borderRadius: 3,
+      width: "300px",
+      "& .MuiOutlinedInput-root": {
+        "& fieldset": {
+          borderColor: isDark ? "#374151" : "#e5e7eb",
+        },
+        "&:hover fieldset": {
+          borderColor: isDark ? "#60a5fa" : "#2563eb",
+        },
+      },
+    }}
+  />
+
+  {/* Boshlanish sanasi */}
+  <TextField
+    type="date"
+    label="Boshlanish"
+    value={startDate}
+    onChange={(e) => setStartDate(e.target.value)}
+    sx={{
+      width: "50%",
+      "& .MuiInputBase-root": {
+        color: isDark ? "#fff" : "#000",
+        backgroundColor: isDark ? "#1e293b" : "#fafafa",
+        borderRadius: 2,
+      },
+      "& .MuiOutlinedInput-notchedOutline": {
+        borderColor: isDark ? "#374151" : "#e5e7eb",
+      },
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: isDark ? "#60a5fa" : "#2563eb",
+      },
+      "& .MuiInputLabel-root": {
+        color: isDark ? "#9ca3af" : "#6b7280",
+      },
+    }}
+    InputLabelProps={{ shrink: true }}
+  />
+
+  {/* Tugash sanasi */}
+  <TextField
+    type="date"
+    label="Tugash"
+    value={endDate}
+    onChange={(e) => setEndDate(e.target.value)}
+    sx={{
+      width: "50%",
+      "& .MuiInputBase-root": {
+        color: isDark ? "#fff" : "#000",
+        backgroundColor: isDark ? "#1e293b" : "#fafafa",
+        borderRadius: 2,
+      },
+      "& .MuiOutlinedInput-notchedOutline": {
+        borderColor: isDark ? "#374151" : "#e5e7eb",
+      },
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: isDark ? "#60a5fa" : "#2563eb",
+      },
+      "& .MuiInputLabel-root": {
+        color: isDark ? "#9ca3af" : "#6b7280",
+      },
+    }}
+    InputLabelProps={{ shrink: true }}
+  />
+</Stack>
+
 
    {/* To‘lov qilish, ayirish va umumiy tugmalar */}
 {(user?.role === "SUPERADMIN" || user?.role === "ADMIN") && (
@@ -419,7 +485,7 @@ const Tolovlar: React.FC = () => {
   </Box>
 ) : payments.length === 0 ? (
   <Typography align="center" sx={{ mt: 4 }}>
-    Sizni hali to‘lovlaringiz yo'q.
+    Sizning hali to‘lovlaringiz yo'q.
   </Typography>
 ) : (
   <>
