@@ -158,15 +158,22 @@ function Xabarlashish() {
           setLoading(false);
           return;
         }
+        
+        console.log("email",user.email);
+        
 
         await axios.post(
-          `${Base_url}/contacts/create`,
+          `${Base_url}/notifications/create/notificatioin/superadmin`,
           {
-            email: user.email,
-            phone: user.phone || "+998901234567",
             message,
+            email:user.email
           },
-          { headers: { "Content-Type": "application/json" } }
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
 
         showSnackbar("Xabaringiz yuborildi!", "success");

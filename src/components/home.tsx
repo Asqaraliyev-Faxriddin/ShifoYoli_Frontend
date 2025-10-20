@@ -239,7 +239,7 @@ function HomeUser() {
                 color: isDark ? "#60a5fa" : "primary.main",
               }}
             >
-              💰 Hisobingiz:{" "}
+              Hisobingiz:{" "}
               <span style={{ fontWeight: "bold" }}>
                 {Number(user.wallet?.balance || 0).toLocaleString("uz-UZ")} so‘m
               </span>
@@ -261,7 +261,6 @@ function HomeUser() {
         <CardContent
           sx={{ display: "flex", alignItems: "center", gap: 3, p: "0 !important" }}
         >
-          <CalendarMonthIcon color="primary" sx={{ fontSize: 50 }} />
           <Box>
             <Typography
               variant="h6"
@@ -282,7 +281,7 @@ function HomeUser() {
               variant="body1"
               sx={{ mt: 1, color: isDark ? "#b0b0b0" : "text.secondary" }}
             >
-              ⏰ Hozirgi vaqt:{" "}
+              Hozirgi vaqt:{" "}
               <strong>{time.format("HH:mm:ss")}</strong> 
             </Typography>
           </Box>
