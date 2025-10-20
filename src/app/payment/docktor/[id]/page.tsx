@@ -219,12 +219,12 @@ export default function PaymentDoctorPage() {
   );
 
   return (
-    <div className="p-4 sm:p-6 max-w-lg mx-auto min-h-screen bg-gray-50">
+    <div className="p-4 sm:p-6 max-w-lg mx-auto mt-6 rounded-2xl bg-gray-50">
       <button
         onClick={() => router.back()}
-        className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6 font-medium"
+        className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6 font-medium hover:cursor-pointer"
       >
-        <ArrowLeft size={20} /> Orqaga
+        <ArrowLeft size={20}  /> Orqaga
       </button>
 
       <h1 className="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">
