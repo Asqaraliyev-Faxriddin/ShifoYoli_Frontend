@@ -56,7 +56,7 @@ interface Doctor {
   doctorProfileId?: string;
   profileImg: string | null;
   isActive: boolean;
-  blockedUser: any;
+  blockedUser: unknown;
   categoryId: string;
   categoryName?: string;
   bio: string;
@@ -83,6 +83,32 @@ const mockCategories: Category[] = [
   { id: "c7e8f9a0-b1c2-d3e4-f5a6-b7c8d9e0f1a2", name: "Dermatolog" },
 ];
 
+
+interface DoctorModalProps {
+  title: string;
+  selectedDoctor: Doctor ;
+  setSelectedDoctor: React.Dispatch<React.SetStateAction<Doctor>>;
+  password: string;
+  setPassword: React.Dispatch<React.SetStateAction<string>>;
+  profileImg: File | null;
+  setProfileImg: React.Dispatch<React.SetStateAction<File | null>>;
+  onSave: () => void;
+  onClose: () => void;
+  error?: string | null;
+  isDark: boolean;
+  isEdit: boolean;
+  imagesState: File[];
+  setImagesState: React.Dispatch<React.SetStateAction<File[]>>;
+  videosState: File[];
+  setVideosState: React.Dispatch<React.SetStateAction<File[]>>;
+  filesState: File[];
+  setFilesState: React.Dispatch<React.SetStateAction<File[]>>;
+  futuresState: string[];
+  setFuturesState: React.Dispatch<React.SetStateAction<string[]>>;
+  futureInput: string;
+  setFutureInput: React.Dispatch<React.SetStateAction<string>>;
+}
+
 // -------------------- DoctorModal (improved) --------------------
 function DoctorModal({
   title,
@@ -107,7 +133,7 @@ function DoctorModal({
   setFuturesState,
   futureInput,
   setFutureInput,
-}: any) {
+}:DoctorModalProps) {
   // Styles
   const inputStyle = {
     "& .MuiInputBase-input": {
@@ -1144,8 +1170,8 @@ export default function Doctorlar() {
       <Modal open={openEditModal} onClose={() => setOpenEditModal(false)}>
         <DoctorModal
           title="✏️ Doktor ma'lumotlarini tahrirlash"
-          selectedDoctor={selectedDoctor}
-          setSelectedDoctor={setSelectedDoctor}
+          selectedDoctor={selectedDoctor!}
+          setSelectedDoctor={setSelectedDoctor as React.Dispatch<React.SetStateAction<Doctor>>}
           password={password}
           setPassword={setPassword}
           profileImg={profileImg}
@@ -1172,8 +1198,8 @@ export default function Doctorlar() {
       <Modal open={openAddModal} onClose={() => setOpenAddModal(false)}>
         <DoctorModal
           title="➕ Yangi doktor qo'shish"
-          selectedDoctor={selectedDoctor}
-          setSelectedDoctor={setSelectedDoctor}
+          selectedDoctor={selectedDoctor!}
+          setSelectedDoctor={setSelectedDoctor as React.Dispatch<React.SetStateAction<Doctor>>}
           password={password}
           setPassword={setPassword}
           profileImg={profileImg}

@@ -3,7 +3,7 @@
 import type React from "react"
 import { useEffect, useState, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import axios from "axios"
+import axios, { isAxiosError } from "axios"
 import {
     User,
     Lock,
@@ -117,10 +117,10 @@ export interface UserData {
     month: number | null
     day: number | null
     phoneNumber: string | null
-    dailyAccess: any[]
+    dailyAccess: unknown[]
     doctorProfile: DoctorProfile | null
     devices: Device[]
-    meetingsAsDoctor: any[]
+    meetingsAsDoctor: unknown[]
     _count: CountData
     notifications: Notifications
 }
@@ -167,13 +167,20 @@ function NotificationMessage({ message, type, clearNotification }: NotificationP
     )
 }
 
-const getErrorMessage = (err: any) => {
-    const rawMessage = err.response?.data?.message?.message || err.response?.data?.message || err.message
-    return typeof rawMessage === "string" && rawMessage
-        ? rawMessage
-        : "Kutilmagan xato yuz berdi. Server javobini tekshiring."
-}
-
+const getErrorMessage = (err: unknown): string => {
+    if (isAxiosError(err)) {
+      const rawMessage =
+        err.response?.data?.message?.message ||
+        err.response?.data?.message ||
+        err.message;
+  
+      if (typeof rawMessage === "string" && rawMessage.trim()) {
+        return rawMessage;
+      }
+    }
+  
+    return "Kutilmagan xato yuz berdi. Server javobini tekshiring.";
+  };
 // --- Shaxsiy Ma'lumotlarni Tahrirlash Komponenti ---
 
 interface EditFormState {
