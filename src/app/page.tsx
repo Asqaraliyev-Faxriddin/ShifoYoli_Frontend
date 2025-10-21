@@ -44,7 +44,7 @@ export default function Home() {
             <section className={`${isDark ? "bg-gray-900 text-white" : "bg-white text-black"} py-10`}>
             <div className="max-w-[1200px] mx-auto text-center px-4">
               <p className="text-3xl md:text-4xl font-bold">Ko‘p murojaat qilinadigan shifokorlar</p>
-              <p className={`mt-4 max-w-3xl mx-auto w-[400px] ${isDark ? "text-gray-300" : "text-gray-600"}`}>
+              <p className={`mt-4 max-w-3xl mx-auto w-[320px] ${isDark ? "text-gray-300" : "text-gray-600"}`}>
               Tajribali shifokorlar bilan masofadan tez va qulay bog‘laning.
                Sizning sog‘lig‘ingiz uchun eng zamonaviy usullar asosida maslahat va yo‘l-yo‘riqlar oling.
 
