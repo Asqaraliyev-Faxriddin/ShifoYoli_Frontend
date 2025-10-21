@@ -238,7 +238,6 @@ export default function ProfileLayout() {
     setIsMobileMenuOpen(false);
   };
 
-  // ✅ Sahifani render qilish
   const renderPage = () => {
     switch (active) {
       case "home":
@@ -258,6 +257,7 @@ export default function ProfileLayout() {
         return <Bemorlar />;
       case "xabarlashish":
         return <Xabarlashish />;
+        
         case "checkdocktor":
           return <Check_Docktor />;
 

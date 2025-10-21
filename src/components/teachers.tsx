@@ -59,7 +59,7 @@ const TopDoctors: React.FC = () => {
     <div
       style={{
         padding: "80px 20px",
-        backgroundColor: isDark ? "#0b1321" : "#fff",
+        backgroundColor: isDark ? "#111827" : "#fff",
         color: isDark ? "#fff" : "#000",
       }}
     >

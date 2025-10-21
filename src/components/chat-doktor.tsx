@@ -304,7 +304,19 @@
 
             return (
               <div key={m.id} style={styles.bubble(mine)}>
-                {m.type === "TEXT" && <div>{m.message}</div>}
+               {m.type === "TEXT" && (
+  <div
+    className="w-[250px]"
+    style={{
+      wordBreak: "break-word",
+      overflowWrap: "break-word",
+      whiteSpace: "pre-wrap",
+    }}
+  >
+    {m.message}
+  </div>
+)}
+
                 {m.type !== "TEXT" && (
                   <>
                     {isImg ? (
