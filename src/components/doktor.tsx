@@ -138,8 +138,7 @@ const FullDoctors: React.FC = () => {
           setSnackbarSeverity("error");
           setSnackbarOpen(true);
           router.push("/login");
-          // @ts-ignore
-        } else if ([400, 403].includes(axiosError.response?.status || 0)) {
+        } else if (([400, 403].indexOf(axiosError.response?.status || 0) != -1 )) {
           // 🔹 Userga ruxsat sorash
           setPaymentModalOpen(true);
         } else {

@@ -109,7 +109,7 @@ const Notification: React.FC = () => {
   };
 
   // 🕹 Pagination
-  const handleChangePage = (_: any, value: number) => setPage(value);
+  const handleChangePage = (_:unknown, value: number) => setPage(value);
 
   return (
     <Box

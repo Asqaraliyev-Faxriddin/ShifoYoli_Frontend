@@ -39,6 +39,12 @@ interface DoctorsResponse {
   meta: { total: number; page: number; limit: number; totalPages: number };
 }
 
+interface Limit2 {
+  limit:number,
+  page:number,
+  categoryId?:string;
+}
+
 const FullTeachers: React.FC = () => {
   const { isDark } = useUserStore();
   const router = useRouter();
@@ -71,7 +77,7 @@ const FullTeachers: React.FC = () => {
     else setLoading(true);
 
     try {
-      const params: any = {
+      const params:Limit2  = {
         limit,
         page: pageNumber,
       };
