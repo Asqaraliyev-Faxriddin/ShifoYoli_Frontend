@@ -224,7 +224,7 @@ const ShifoYoliAkademiyaSahifasi: React.FC = () => {
               />
               <div style={currentStyles.slaydSarlavha}>{rasm.sarlavha}</div>
             </div>
-          ))}
+          ))} 
           
           <div style={currentStyles.nuqtaKonteyner}>
               {tibbiyotRasmlari.map((_, index) => (
