@@ -62,14 +62,28 @@ const FullTeachers: React.FC = () => {
   const limit = 10;
 
   // 🔹 Kategoriyalarni olish
-  const fetchCategories = async () => {
-    try {
-      const res = await axios.get(`${Base_url}/User/doctor-all/category`);
-      setCategories(res.data);
-    } catch (err) {
-      console.error("Kategoriyalarni olishda xatolik:", err);
-    }
-  };
+  // 🔹 Kategoriyalarni olish
+const fetchCategories = async () => {
+  try {
+    const res = await axios.get(`${Base_url}/User/doctor-all/category`);
+    console.log(res.data);
+
+    // `res.data` obyektni massivga aylantiramiz
+    const cats = Object.values(res.data).filter(
+      (item): item is Category =>
+        typeof item === "object" &&
+        item !== null &&
+        "id" in item &&
+        "name" in item
+    );
+
+    setCategories(cats);
+  } catch (err) {
+    console.error("Kategoriyalarni olishda xatolik:", err);
+  }
+};
+
+  
 
   // 🔹 Doktorlarni olish
   const fetchDoctors = async (pageNumber = 1, append = false) => {
@@ -169,7 +183,7 @@ const FullTeachers: React.FC = () => {
           Barchasi
         </Button>
 
-        {categories.map((cat) => (
+        {  categories.map((cat) => (
           <Button
             key={cat.id}
             variant={selectedCategory === cat.id ? "contained" : "outlined"}
