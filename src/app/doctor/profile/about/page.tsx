@@ -185,7 +185,6 @@ export default function ProfileLayout() {
     fetchProfile();
   }, [router]);
 
-  // ✅ Salomlashish
   useEffect(() => {
     if (user?.fullName && typeof window !== "undefined" && "speechSynthesis" in window) {
       const synth = window.speechSynthesis;
@@ -271,14 +270,12 @@ export default function ProfileLayout() {
   return (
     <div className={`flex min-h-screen ${isDark ? "dark bg-gray-900 text-white" : "bg-gray-50 text-black"}`}>
       
-      {/* 1. Sidebar (Desktop) */}
       <aside
   className={`hidden md:flex flex-col shadow-2xl transition-all duration-300 z-30 fixed left-0 top-0 bottom-0
     ${collapsed ? "w-20 items-center" : "w-64"}
     ${isDark ? "bg-gray-800 text-gray-200" : "bg-white text-gray-800"}
   `}
 >
-  {/* Logo/Header */}
   <div
     className={`flex items-center ${
       collapsed ? "justify-center" : "justify-between"
@@ -417,7 +414,7 @@ export default function ProfileLayout() {
             </button>
 
             {/* User info */}
-            <div className="relative" ref={dropdownRef}>
+            {/* <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setDropdown(!dropdown)}
                 className={`flex items-center gap-3 rounded-2xl p-1 pr-3 transition hover:shadow-xl ${
@@ -440,17 +437,15 @@ export default function ProfileLayout() {
                   </p>
                 </div>
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
 
-        {/* Content Render */}
         <div className="mt-8">
             {renderPage()}
         </div>
       </main>
 
-      {/* 3. Mobile Sidebar (Modal) */}
       <div
   ref={mobileMenuRef}
   className={`fixed top-0 left-0 h-full w-full bg-black bg-opacity-50 z-50 transform md:hidden transition-opacity duration-300
@@ -462,7 +457,6 @@ export default function ProfileLayout() {
       ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
     onClick={(e) => e.stopPropagation()}
   >
-    {/* Yuqori qismlar */}
     <div className="flex justify-end mb-4 p-2">
       <button
         onClick={() => setIsMobileMenuOpen(false)}
@@ -472,7 +466,6 @@ export default function ProfileLayout() {
       </button>
     </div>
 
-    {/* Scroll bo‘ladigan qism */}
     <div className="flex-1 overflow-y-auto px-2 pb-6">
       <nav className="flex flex-col gap-2">
         {menus.map((menu) => (
