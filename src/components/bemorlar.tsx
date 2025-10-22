@@ -427,7 +427,7 @@ export default function Bemorlar() {
       setOpenEditModal(false);
       fetchUsers();
       showAlert("✏️ Ma’lumotlar yangilandi");
-    } catch (err: any) {
+    } catch (err) {
       if(isAxiosError(err)){
         const errorMessage = err.response?.data?.message || "Server xatosi: bemor qo‘shilmadi";
       setError(`❌ Xatolik: ${errorMessage}`);
