@@ -70,6 +70,25 @@ interface Doctor {
   phoneNumber?: string;
 }
 
+interface DoctorProfile {
+  id: string;
+  categoryId?: string;
+  category?: {
+    id: string;
+    name: string;
+  };
+  bio?: string;
+  salary?: {
+    daily: number;
+  }[];
+  published?: boolean;
+  images?: string[];
+  videos?: string[];
+  files?: string[];
+  futures?: string[];
+  free?: boolean;
+}
+
 interface Category {
   id: string;
   name: string;
@@ -561,7 +580,7 @@ function DoctorInfoModal({ doctor, onClose, isDark }: { doctor: Doctor; onClose:
     "&:last-child": { borderBottom: "none" },
   };
 
-  const renderMediaList = (items: any, icon: React.ReactNode, title: string, size: "small" | "large" = "large") => {
+  const renderMediaList = (items: unknown, icon: React.ReactNode, title: string, size: "small" | "large" = "large") => {
     const BASE_URL = "https://faxriddin.bobur-dev.uz/";
     const safeItems = Array.isArray(items) ? items : typeof items === "string" ? [items] : [];
 
@@ -695,6 +714,18 @@ export default function Doctorlar() {
   const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
   const Base_url = "https://faxriddin.bobur-dev.uz";
 
+  interface RawDoctor {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    age?: number;
+    profileImg?: string | null;
+    isActive: boolean;
+    blockedUser: unknown;
+    phoneNumber?: string;
+    doctorProfile?: DoctorProfile;
+  }
   // Fetch doctors
   const fetchDoctors = useCallback(async () => {
     if (!token) return;
@@ -705,8 +736,8 @@ export default function Doctorlar() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const fetchedDoctors: Doctor[] = res.data.data.map((doc: any) => {
-        const profile = doc.doctorProfile || {};
+      const fetchedDoctors: Doctor[] = res.data.data.map((doc: RawDoctor) => {
+        const profile = doc.doctorProfile || {} as DoctorProfile;
         return {
           id: doc.id,
           firstName: doc.firstName,
