@@ -66,7 +66,6 @@ const FullTeachers: React.FC = () => {
 const fetchCategories = async () => {
   try {
     const res = await axios.get(`${Base_url}/User/doctor-all/category`);
-    console.log(res.data);
 
     // `res.data` obyektni massivga aylantiramiz
     const cats = Object.values(res.data).filter(

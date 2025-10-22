@@ -136,7 +136,8 @@ function HomeUser() {
   useEffect(() => {
     async function fetchProfile() {
       try {
-        const token = localStorage.getItem("accessToken");
+        const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+
         if (!token) return router.push("/");
 
         const { data } = await axios.get(
@@ -168,7 +169,7 @@ function HomeUser() {
     async function fetchTopDoctors() {
       try {
         const { data } = await axios.get(
-          ` ${Base_url}/User/top-doctors`
+          `${Base_url}/User/top-doctors`
         );
         setTopDoctors(data);
       } catch (error) {

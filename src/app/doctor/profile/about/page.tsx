@@ -187,32 +187,26 @@ export default function ProfileLayout() {
 
   // ✅ Salomlashish
   useEffect(() => {
-    if (user?.fullName) {
-      speechSynthesis.cancel();
+    if (user?.fullName && typeof window !== "undefined" && "speechSynthesis" in window) {
+      const synth = window.speechSynthesis;
+      synth.cancel();
+  
       const speakUser = () => {
         const text = `Welcome to the site, ${user.firstName}!`;
         const utterance = new SpeechSynthesisUtterance(text);
-        const voices = speechSynthesis.getVoices();
-        const englishVoice =
-          voices.find((v) => v.lang === "en-US") ||
-          voices.find((v) => v.lang.startsWith("en")) ||
-          voices[0];
-
-        if (englishVoice) utterance.voice = englishVoice;
         utterance.lang = "en-US";
         utterance.rate = 0.85;
-        utterance.pitch = 1;
-        utterance.volume = 1;
-        speechSynthesis.speak(utterance);
+        synth.speak(utterance);
       };
-
-      if (speechSynthesis.getVoices().length === 0) {
-        speechSynthesis.onvoiceschanged = speakUser;
+  
+      if (synth.getVoices().length === 0) {
+        synth.onvoiceschanged = speakUser;
       } else {
         speakUser();
       }
     }
   }, [user]);
+  
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
