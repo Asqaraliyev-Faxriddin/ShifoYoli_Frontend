@@ -164,6 +164,8 @@ export default function VerifyPage() {
         }
       } catch (error) {
         // ❌ verify xato qaytarsa shu yerda to‘xtaymiz
+        console.log(error);
+        
         if (axios.isAxiosError(error)) {
           const data = error.response?.data;
           let msg = "Kod noto‘g‘ri yoki muddati tugagan";
@@ -219,6 +221,8 @@ export default function VerifyPage() {
   
         router.push("/doctor/profile/about");
       } catch (error) {
+        console.log(error);
+        
         if (axios.isAxiosError(error)) {
           const data = error.response?.data;
           let msg = "Ro'yxatdan o'tishda xatolik";
