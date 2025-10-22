@@ -23,10 +23,56 @@
     createdAt: string;
   }
 
+  interface User {
+
+    id: string;
+    firstName: string;
+    lastName: string;
+    profileImg?: string | null;
+
+
+  } 
+
+  interface Pinterface {
+    userId: string;
+  }
+  
+
+  interface Cinterface {
+
+    id: string;
+    participants?: Pinterface[];
+
+
+  }
+
+  interface Minterface {
+
+    id: string;
+    senderId: string;
+    message: string;
+    type: MsgType;
+    createdAt: string;
+  }
+
+  interface PayloadInterface {
+    id?: string;
+  }
+
+  interface ListInterface {
+    includes: (userId: string) => boolean;
+  }
+
+  interface DataInterface {
+    userId: string;
+    online: boolean;
+    lastSeen?: string;
+  }
+
   export default function Chat_Doctor({ fullname,doctorId, onClose }: ChatDoctorProps) {
     const { isDark, setIsDark } = useUserStore();
     const [socket, setSocket] = useState<Socket | null>(null);
-    const [user, setUser] = useState<any>(null);
+    const [user, setUser] = useState<User | null >(null);
     const [chatId, setChatId] = useState<string | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
@@ -72,7 +118,7 @@
           s.emit("create_chat", { receiverId: doctorId });
           return;
         }
-        const chat = chats.find((c: any) => c.participants?.some((p: any) => p.userId === doctorId));
+        const chat = chats.find((c: Cinterface) => c.participants?.some((p: Pinterface) => p.userId === doctorId));
         if (chat) {
           setChatId(chat.id);
           s.emit("get_messages", { chatId: chat.id });
@@ -88,7 +134,7 @@
       // === 3. XABARLARNI OLIB KELISH ===
       s.on("messages_list", (res) => {
         const arr = Array.isArray(res.data) ? res.data : [];
-        const fixed = arr.map((m: any) => {
+        const fixed = arr.map((m: Minterface) => {
           const fullUrl =
             m.type === "TEXT"
               ? m.message
@@ -115,7 +161,7 @@
         setMessages((prev) => prev.map((m) => (m.id === msg.id ? { ...m, message: msg.message } : m)));
       });
 
-      s.on("message_deleted", (payload: any) => {
+      s.on("message_deleted", (payload: PayloadInterface) => {
         const id = payload?.id ?? payload;
         setMessages((prev) => prev.filter((m) => m.id !== id));
       });
@@ -123,13 +169,13 @@
       // === 4. ONLINE STATUS ===
       s.emit("get_online_users");
 
-      s.on("online_users", (list: any) => {
+      s.on("online_users", (list: ListInterface) => {
         const online = list.includes(doctorId);
         setDoctorOnline(online);
         if (!online) setLastSeen(null);
       });
 
-      s.on("user_online", (data: any) => {
+      s.on("user_online", (data: DataInterface) => {
         if (data.userId === doctorId) {
           setDoctorOnline(data.online);
           if (!data.online && data.lastSeen) setLastSeen(data.lastSeen);

@@ -909,8 +909,7 @@ export default function Doctorlar() {
       setOpenAddModal(false);
       fetchDoctors();
       showAlert("🟢 Yangi doktor qo‘shildi");
-    } catch (err: any) {
-      console.error(err);
+    } catch (err) {
       if (axios.isAxiosError(err)) {
         const serverMessage = err.response?.data?.message?.message || err.response?.data?.message || err.message;
         setError(`❌ Xatolik: ${serverMessage}`);
@@ -964,7 +963,7 @@ export default function Doctorlar() {
 
           // Images
       const existingImages = Array.isArray(selectedDoctor.images)
-      ? selectedDoctor.images.filter((i: any) => typeof i === "string")
+      ? selectedDoctor.images.filter((i:unknown) => typeof i === "string")
       : [];
           
       existingImages.forEach((s: string) => profileFormData.append("images", s));
@@ -973,7 +972,7 @@ export default function Doctorlar() {
       imagesState.forEach((f) => profileFormData.append("images", f));
       }
       const existingVideos = Array.isArray(selectedDoctor.videos)
-        ? selectedDoctor.videos.filter((i: any) => typeof i === "string")
+        ? selectedDoctor.videos.filter((i: unknown) => typeof i === "string")
         : [];
       existingVideos.forEach((s: string) => profileFormData.append("videos", s));
       
@@ -983,7 +982,7 @@ export default function Doctorlar() {
       
       // Files
       const existingFiles = Array.isArray(selectedDoctor.files)
-        ? selectedDoctor.files.filter((i: any) => typeof i === "string")
+        ? selectedDoctor.files.filter((i: unknown) => typeof i === "string")
         : [];
       existingFiles.forEach((s: string) => profileFormData.append("files", s));
       
@@ -1009,8 +1008,7 @@ export default function Doctorlar() {
       showAlert("✏️ Doktor ma’lumotlari muvaffaqiyatli yangilandi!");
       setOpenEditModal(false);
       fetchDoctors();
-    } catch (err: any) {
-      console.error("❌ Xatolik:", err);
+    } catch (err) {
       if (axios.isAxiosError(err)) {
         const status = err.response?.status;
         const msg = err.response?.data?.message?.message || err.response?.data?.message || err.message;

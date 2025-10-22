@@ -148,7 +148,6 @@ const FullDoctors: React.FC = () => {
           }
         );
 
-        // Payment OK → chat ochish
         setChatOpen(true)
       } catch (err) {
         const axiosError = err as AxiosError;
@@ -157,7 +156,7 @@ const FullDoctors: React.FC = () => {
           setSnackbarSeverity("error");
           setSnackbarOpen(true);
           router.push("/login");
-          // @ts-ignore
+          
         } else if (([400, 403].indexOf(axiosError.response?.status || 0) != -1)) {
           // 🔹 Userga ruxsat sorash
           setPaymentModalOpen(true);

@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
 // Axios o'rniga fetch/retry logikasi foydalaniladi (asl axios importi saqlanadi)
-import axios from "axios";
+import axios, { AxiosError, isAxiosError } from "axios";
 // useUserStore va lucide-react, MUI importlari saqlanadi
 import { useUserStore } from "@/store/UseUserStore";
 import {
@@ -37,7 +37,12 @@ interface User {
   age: number;
   profileImg: string | null;
   isActive: boolean;
-  blockedUser: any;
+  blockedUser: {
+    id:string;
+    reason: string;
+    blockedAt: string;
+   
+  } | null;
   wallet: { balance: string };
   phoneNumber?: string;
   month?: number;
@@ -57,7 +62,19 @@ function UserModal({
   onClose,
   error,
   isDark,
-}: any) {
+}: {
+  title: string;
+  editUser: User | null;
+  setEditUser: React.Dispatch<React.SetStateAction<User | null>>;
+  password: string;
+  setPassword: React.Dispatch<React.SetStateAction<string>>;
+  profileImg: File | null;
+  setProfileImg: React.Dispatch<React.SetStateAction<File | null>>;
+  onSave: (e: React.FormEvent) => void;
+  onClose: () => void;
+  error: string | null;
+  isDark: boolean;
+}) {
   // TextField larni dark mode ga moslashtirish uchun uslub
   const inputStyle = {
     "& .MuiInputBase-input": {
@@ -366,10 +383,15 @@ export default function Bemorlar() {
       setOpenAddModal(false);
       fetchUsers();
       showAlert("🟢 Yangi bemor qo‘shildi");
-    } catch (err: any) {
-      console.error(err);
-      const errorMessage = err.response?.data?.message || "Server xatosi: bemor qo‘shilmadi";
+    } catch (err) {
+
+      if(isAxiosError(err)){
+        const errorMessage = err.response?.data?.message || "Server xatosi: bemor qo‘shilmadi";
       setError(`❌ Xatolik: ${errorMessage}`);
+      }
+
+      setError("❌ Xatolik: bemor qo‘shilmadi");
+    
     }
   };
 
@@ -406,9 +428,13 @@ export default function Bemorlar() {
       fetchUsers();
       showAlert("✏️ Ma’lumotlar yangilandi");
     } catch (err: any) {
-      console.error(err);
-      const errorMessage = err.response?.data?.message || "Server xatosi: ma’lumot yangilanmadi!";
+      if(isAxiosError(err)){
+        const errorMessage = err.response?.data?.message || "Server xatosi: bemor qo‘shilmadi";
       setError(`❌ Xatolik: ${errorMessage}`);
+      }
+
+      setError("❌ Xatolik: bemor qo‘shilmadi");
+    
     }
   };
 
