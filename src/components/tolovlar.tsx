@@ -189,7 +189,7 @@ const Tolovlar: React.FC = () => {
           : Math.abs(Number(amountInput));
       await axios.post(
         url,
-        { userId: selectedUserId, amount },
+        { userId: selectedUserId, amount:-amount },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setSnackbar({
