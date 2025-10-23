@@ -166,7 +166,6 @@
             : `${Base_url}/uploads/chat/${msg.message}`;
       
         setMessages((prev) => {
-          // TEMP xabarni aniqlaymiz
           const tempIndex = prev.findIndex(
             (m) =>
               m.senderId === user?.id &&
