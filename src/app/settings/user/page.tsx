@@ -540,7 +540,7 @@ function ShifokorSozlamalari({ user, token, setNotification, isDark, setUserData
           }
       
           // URL ni to‘g‘ri tanlash
-          url = `https://faxriddin.bobur-dev.uz/doctor-profile/add-${fileType === "images" ? "image" : "video"}/${user.id}`;
+          url = `https://faxriddin.bobur-dev.uz/doctor-profile/add-${fileType === "images" ? "image" : "video"}/${user.doctorProfile?.id}`;
           data = formData;
         }
       
@@ -549,7 +549,7 @@ function ShifokorSozlamalari({ user, token, setNotification, isDark, setUserData
           method = "DELETE";
       
           // URL
-          url = `https://faxriddin.bobur-dev.uz/doctor-profile/remove-${fileType === "images" ? "image" : "video"}/${user.id}`;
+          url = `https://faxriddin.bobur-dev.uz/doctor-profile/remove-${fileType === "images" ? "image" : "video"}/${user.doctorProfile?.id}`;
       
           // DELETE uchun body
           data = {
@@ -589,7 +589,6 @@ function ShifokorSozlamalari({ user, token, setNotification, isDark, setUserData
           setNewImage(null);
           setNewVideo(null);
         } catch (err) {
-          console.error("❌ Fayl boshqaruvida xato:", err);
           setNotification(`Fayl boshqaruvida xato: ${getErrorMessage(err)}`, "error");
         } finally {
           setIsFileLoading(false);
@@ -597,29 +596,49 @@ function ShifokorSozlamalari({ user, token, setNotification, isDark, setUserData
       };
       
   
-    // --- Fayllar ro'yxatini chiqarish (o'zgartirishsiz qoldirildi) ---
-    const   renderFileList = (files: string[] | undefined, type: "images" | "videos" | "files") => (
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-3">
-        {files?.map((file, index) => (
-          <div
-            key={index}
-            className={`relative p-2 rounded-xl border flex flex-col justify-between ${isDark ? "bg-gray-700 border-gray-600" : "bg-gray-100 border-gray-200"}`}
-          >
-            <p className={`text-xs font-medium truncate ${isDark ? "text-gray-300" : "text-gray-700"}`}>
-              {file.split("/").pop()}
-            </p>
-            <button
-              onClick={() => handleFileAction("remove", file, type)}
-              disabled={isFileLoading || !token}
-              className="absolute top-1 right-1 p-1 rounded-full bg-red-500 text-white hover:bg-red-600 transition disabled:opacity-50"
-              title="O'chirish"
-            >
-              <Trash2 size={14} />
-            </button>
+      const renderFileList = (
+        files: string[] | string | Record<string, string> | undefined,
+        type: "images" | "videos" | "files"
+      ) => {
+        const safeFiles =
+          Array.isArray(files)
+            ? files
+            : typeof files === "string"
+            ? [files]
+            : typeof files === "object" && files !== null
+            ? Object.values(files)
+            : [];
+      
+        return (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-3">
+            {safeFiles.map((file, index) => (
+              <div
+                key={index}
+                className={`relative p-2 rounded-xl border flex flex-col justify-between ${
+                  isDark ? "bg-gray-700 border-gray-600" : "bg-gray-100 border-gray-200"
+                }`}
+              >
+                <p
+                  className={`text-xs font-medium truncate ${
+                    isDark ? "text-gray-300" : "text-gray-700"
+                  }`}
+                >
+                  {file.split("/").pop()}
+                </p>
+                <button
+                  onClick={() => handleFileAction("remove", file, type)}
+                  disabled={isFileLoading || !token}
+                  className="absolute top-1 right-1 p-1 rounded-full bg-red-500 text-white hover:bg-red-600 transition disabled:opacity-50"
+                  title="O'chirish"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-    );
+        );
+      };
+      
   
     const fileInputClasses = `w-full text-sm mt-2 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-500 file:text-white hover:file:bg-indigo-600 transition duration-300 ${isDark ? "text-gray-300" : "text-gray-900"}`;
   

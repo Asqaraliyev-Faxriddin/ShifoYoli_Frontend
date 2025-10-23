@@ -249,7 +249,6 @@ const DoctorDetailPage: React.FC = () => {
         <div
           key={i}
           className="w-1/2 max-[760px]:w-full"
-
           style={{
             borderRadius: "12px",
             overflow: "hidden",
@@ -265,7 +264,7 @@ const DoctorDetailPage: React.FC = () => {
             alt={`rasm-${i}`}
             style={{
               width: "100%",
-              height: "280px", // 🔹 avval 250 edi
+              height: "280px", 
               objectFit: "cover",
               display: "block",
             }}

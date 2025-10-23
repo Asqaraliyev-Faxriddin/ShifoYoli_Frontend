@@ -762,6 +762,8 @@ export default function Doctorlar() {
         } as Doctor;
       });
 
+      
+
       setDoctors(fetchedDoctors);
       setTotalPages(res.data.meta?.totalPages || 1);
     } catch (err) {
