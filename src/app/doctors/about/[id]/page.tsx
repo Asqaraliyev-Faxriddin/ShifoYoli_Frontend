@@ -111,10 +111,10 @@ const DoctorDetailPage: React.FC = () => {
 
   return (
     <Box sx={{ bgcolor: isDark ? "#0b1321" : "#fff", color: isDark ? "#fff" : "#000" }}>
-      <Header />
+      {/* <Header /> */}
 
       {/* Orqaga tugma */}
-      <Box sx={{ px: 4, pt: 18, maxWidth: 1200, mx: "auto" }}>
+      <Box sx={{ px: 4, pt: 7, maxWidth: 1200, mx: "auto" }}>
         <Button
           startIcon={<ArrowBackIcon />}
           onClick={() => router.back()}
@@ -248,10 +248,11 @@ const DoctorDetailPage: React.FC = () => {
       {images.map((url, i) => (
         <div
           key={i}
+          className="w-1/2 max-[760px]:w-full"
+
           style={{
             borderRadius: "12px",
             overflow: "hidden",
-            width: isMobile ? "100%" : "50%",
 
             boxShadow: isDark
               ? "0 4px 12px rgba(0,0,0,0.4)"
@@ -296,11 +297,11 @@ const DoctorDetailPage: React.FC = () => {
       {videos.map((v, i) => (
         <div
           key={i}
-          style={{
+          className="w-1/2 max-[760px]:w-full"
+
+            style={{
             borderRadius: "12px",
             overflow: "hidden",
-            width: isMobile ? "100%" : "50%",
-
             boxShadow: isDark
               ? "0 4px 12px rgba(0,0,0,0.4)"
               : "0 2px 8px rgba(0,0,0,0.1)",

@@ -488,110 +488,175 @@ const Tolovlar: React.FC = () => {
     Sizning hali to‘lovlaringiz yo'q.
   </Typography>
 ) : (
-  <>
-    {/* Desktop table */}
-    <TableContainer
-      component={Paper}
-      sx={{ display: { xs: "none", md: "block" } }}
-    >
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>#</TableCell>
-            {user?.role === "SUPERADMIN" && (
-              <TableCell>Foydalanuvchi</TableCell>
-            )}
-            <TableCell>Miqdori</TableCell>
-            <TableCell>Tipi</TableCell>
-            <TableCell>Manba</TableCell>
-            <TableCell>Vaqti</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {payments.map((p, i) => (
-            <TableRow key={p.id}>
-              <TableCell>{(page - 1) * limit + i + 1}</TableCell>
-              {user?.role === "SUPERADMIN" && (
-                <TableCell>
-                  {p.wallet?.user
-                    ? `${p.wallet.user.firstName} ${p.wallet.user.lastName} (${p.wallet.user.email})`
-                    : "-"}
-                </TableCell>
-              )}
-              <TableCell>{renderAmount(p)}</TableCell>
-              <TableCell>
-                {p.type === "DEBIT" ? "Chiqarildi" : "Kiritildi"}
-              </TableCell>
-              <TableCell>{p.source || "Naqd"}</TableCell>
-              <TableCell>{formatDate(p.createdAt)}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-
-    {/* Mobil uchun card-view */}
-    <Stack spacing={2} sx={{ display: { xs: "flex", md: "none" } }}>
-      {payments.map((p, i) => (
-        <Paper
-          key={p.id}
-          elevation={2}
+<>
+  {/* Desktop table */}
+  <TableContainer
+    component={Paper}
+    sx={{
+      display: { xs: "none", md: "block" },
+      backgroundColor: isDark ? "#121212" : "#fff",
+      color: isDark ? "#e0e0e0" : "#000",
+    }}
+  >
+    <Table>
+      <TableHead>
+        <TableRow
           sx={{
-            p: 2,
-            borderRadius: 2,
-            borderLeft: `6px solid ${
-              p.type === "DEBIT" ? "#f44336" : "#00c853"
-            }`,
+            backgroundColor: isDark ? "#1e1e1e" : "#f5f5f5",
           }}
         >
-          <Typography variant="subtitle2" color="text.secondary">
-            #{(page - 1) * limit + i + 1}
-          </Typography>
-
+          <TableCell sx={{ color: isDark ? "#fff" : "#000" }}>#</TableCell>
           {user?.role === "SUPERADMIN" && (
-            <Typography sx={{ fontWeight: 600 }}>
-              👤{" "}
-              {p.wallet?.user
-                ? `${p.wallet.user.firstName} ${p.wallet.user.lastName}`
-                : "—"}
-            </Typography>
+            <TableCell sx={{ color: isDark ? "#fff" : "#000" }}>
+              Foydalanuvchi
+            </TableCell>
           )}
+          <TableCell sx={{ color: isDark ? "#fff" : "#000" }}>Miqdori</TableCell>
+          <TableCell sx={{ color: isDark ? "#fff" : "#000" }}>Tipi</TableCell>
+          <TableCell sx={{ color: isDark ? "#fff" : "#000" }}>Manba</TableCell>
+          <TableCell sx={{ color: isDark ? "#fff" : "#000" }}>Vaqti</TableCell>
+        </TableRow>
+      </TableHead>
 
-          <Typography>
-            💰 <b>{renderAmount(p)}</b>
+      <TableBody>
+        {payments.map((p, i) => (
+          <TableRow
+            key={p.id}
+            sx={{
+              backgroundColor: isDark ? "#1a1a1a" : "#fff",
+              "&:hover": {
+                backgroundColor: isDark ? "#222" : "#f9f9f9",
+              },
+            }}
+          >
+            <TableCell sx={{ color: isDark ? "#ccc" : "#000" }}>
+              {(page - 1) * limit + i + 1}
+            </TableCell>
+
+            {user?.role === "SUPERADMIN" && (
+              <TableCell sx={{ color: isDark ? "#ccc" : "#000" }}>
+                {p.wallet?.user
+                  ? `${p.wallet.user.firstName} ${p.wallet.user.lastName} (${p.wallet.user.email})`
+                  : "-"}
+              </TableCell>
+            )}
+
+            <TableCell sx={{ color: isDark ? "#ccc" : "#000" }}>
+              {renderAmount(p)}
+            </TableCell>
+
+            <TableCell
+              sx={{
+                color: p.type === "DEBIT" ? "#f44336" : "#00c853",
+                fontWeight: 600,
+              }}
+            >
+              {p.type === "DEBIT" ? "Chiqarildi" : "Kiritildi"}
+            </TableCell>
+
+            <TableCell sx={{ color: isDark ? "#ccc" : "#000" }}>
+              {p.source || "Naqd"}
+            </TableCell>
+
+            <TableCell sx={{ color: isDark ? "#aaa" : "#555" }}>
+              {formatDate(p.createdAt)}
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  </TableContainer>
+
+  {/* Mobil uchun card-view */}
+  <Stack spacing={2} sx={{ display: { xs: "flex", md: "none" } }}>
+    {payments.map((p, i) => (
+      <Paper
+        key={p.id}
+        elevation={2}
+        sx={{
+          p: 2,
+          borderRadius: 2,
+          borderLeft: `6px solid ${
+            p.type === "DEBIT" ? "#f44336" : "#00c853"
+          }`,
+          backgroundColor: isDark ? "#1a1a1a" : "#fff",
+          color: isDark ? "#e0e0e0" : "#000",
+        }}
+      >
+        <Typography variant="subtitle2" color={isDark ? "#aaa" : "text.secondary"}>
+          #{(page - 1) * limit + i + 1}
+        </Typography>
+
+        {user?.role === "SUPERADMIN" && (
+          <Typography sx={{ fontWeight: 600 }}>
+            👤{" "}
+            {p.wallet?.user
+              ? `${p.wallet.user.firstName} ${p.wallet.user.lastName}`
+              : "—"}
           </Typography>
+        )}
 
-          <Typography>
-            🔁 {p.type === "DEBIT" ? "Chiqarildi" : "Kiritildi"}
-          </Typography>
+        <Typography>
+          💰 <b>{renderAmount(p)}</b>
+        </Typography>
 
-          <Typography>📦 {p.source || "Naqd"}</Typography>
+        <Typography
+          sx={{ color: p.type === "DEBIT" ? "#f44336" : "#00c853", fontWeight: 500 }}
+        >
+          🔁 {p.type === "DEBIT" ? "Chiqarildi" : "Kiritildi"}
+        </Typography>
 
-          <Divider sx={{ my: 1 }} />
+        <Typography>📦 {p.source || "Naqd"}</Typography>
 
-          <Typography variant="body2" color="text.secondary">
-            🕒 {formatDate(p.createdAt)}
-          </Typography>
-        </Paper>
-      ))}
-    </Stack>
-  </>
+        <Divider sx={{ my: 1, borderColor: isDark ? "#333" : "#ddd" }} />
+
+        <Typography variant="body2" color={isDark ? "#aaa" : "text.secondary"}>
+          🕒 {formatDate(p.createdAt)}
+        </Typography>
+      </Paper>
+    ))}
+  </Stack>
+</>
+
 )}
 
 
       {/* Sahifalash */}
       {totalPages > 1 && (
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-          <Pagination
-            count={totalPages}
-            page={page}
-            onChange={(e, newPage) => setPage(newPage)}
-            color="primary"
-            showFirstButton
-            showLastButton
-          />
-        </Box>
-      )}
+  <Box
+    sx={{
+      display: "flex",
+      justifyContent: "center",
+      mt: 4,
+      // bgcolor: isDark ? "#121212" : "#f9f9f9", 
+      p: 2,
+      borderRadius: 2,
+    }}
+  >
+    <Pagination
+      count={totalPages}
+      page={page}
+      onChange={(e, newPage) => setPage(newPage)}
+      color={isDark ? "secondary" : "primary"} // rangni dark/lightga qarab o‘zgartiradi
+      showFirstButton
+      showLastButton
+      sx={{
+        "& .MuiPaginationItem-root": {
+          color: isDark ? "#fff" : "#000",
+          backgroundColor: isDark ? "#1e1e1e" : "#fff",
+          "&.Mui-selected": {
+            backgroundColor: isDark ? "#333" : "#1976d2",
+            color: "#fff",
+          },
+          "&:hover": {
+            backgroundColor: isDark ? "#2c2c2c" : "#e0e0e0",
+          },
+        },
+      }}
+    />
+  </Box>
+)}
+
 
       {/* 💳 Dialog */}
       <Dialog
