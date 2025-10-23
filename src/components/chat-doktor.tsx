@@ -104,9 +104,15 @@
       if (!token) return;
 
       const s = io(`${Base_url}`, {
+        path: "/socket.io",
         transports: ["websocket"],
         auth: { token },
+        secure: true, // HTTPS uchun kerak
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 2000,
       });
+      
       setSocket(s);
 
       s.on("connect", () => console.log("✅ Socket ulandi:", s.id));
@@ -158,33 +164,34 @@
       });
 
       s.on("message_sent", (msg: Message) => {
-        const fullUrl =
-          msg.type === "TEXT"
-            ? msg.message
-            : msg.message.startsWith("http")
-            ? msg.message
-            : `${Base_url}/uploads/chat/${msg.message}`;
-      
-        setMessages((prev) => {
-          const tempIndex = prev.findIndex(
-            (m) =>
-              m.senderId === user?.id &&
-              m.id.startsWith("temp-") &&
-              (m.message === msg.message || m.message === msg.fileUrl)
-          );
-      
-          // Agar topilsa — temp xabarni haqiqiyga almashtiramiz
-          if (tempIndex !== -1) {
-            const updated = [...prev];
-            updated[tempIndex] = { ...msg, fileUrl: fullUrl };
-            return updated;
-          }
-      
-          // Aks holda — yangi xabar sifatida qo‘shamiz
-          return [...prev, { ...msg, fileUrl: fullUrl }];
-        });
-      });
-      
+  const fullUrl =
+    msg.type === "TEXT"
+      ? msg.message
+      : msg.message.startsWith("http")
+      ? msg.message
+      : `${Base_url}/uploads/chat/${msg.message}`;
+
+  setMessages((prev) => {
+    // TEMP xabarni aniqlaymiz
+    const tempIndex = prev.findIndex(
+      (m) =>
+        m.senderId === user?.id &&
+        m.id.startsWith("temp-") &&
+        (m.message === msg.message || m.message === msg.fileUrl)
+    );
+
+    // Agar topilsa — temp xabarni haqiqiyga almashtiramiz
+    if (tempIndex !== -1) {
+      const updated = [...prev];
+      updated[tempIndex] = { ...msg, fileUrl: fullUrl };
+      return updated;
+    }
+
+    // Aks holda — yangi xabar sifatida qo‘shamiz
+    return [...prev, { ...msg, fileUrl: fullUrl }];
+  });
+});
+
 
       s.on("message_updated", (msg: Message) => {
         setMessages((prev) => prev.map((m) => (m.id === msg.id ? { ...m, message: msg.message } : m)));
